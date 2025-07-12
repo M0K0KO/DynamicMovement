@@ -5,13 +5,13 @@ public class SprintState : BaseState
     {
         manager.desiredDissolveValue = 0f;
         
-        if (manager.player.controller.isGrounded) manager.MovePlayer(manager.player.sprintSpeed);
+        if (manager.player.playerPhysics.IsGrounded()) manager.MovePlayer(manager.player.sprintSpeed);
         manager.player.animator.CrossFadeInFixedTime("Sprint", 0.1f);
     }
 
     public override void UpdateState()
     {
-        if (manager.player.controller.isGrounded && 
+        if (manager.player.playerPhysics.IsGrounded() && 
             manager.player.animator.GetCurrentAnimatorStateInfo(0).IsName("Sprint"))
         {
             manager.MovePlayer(manager.player.sprintSpeed);

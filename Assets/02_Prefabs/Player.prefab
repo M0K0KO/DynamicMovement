@@ -72,6 +72,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6716316509789813351}
   - component: {fileID: 8270617045247747443}
+  - component: {fileID: 2124403734892092745}
   - component: {fileID: 4957203833760936166}
   - component: {fileID: 6269732493585048522}
   - component: {fileID: -7672996034493453211}
@@ -120,6 +121,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weapon: {fileID: 6271097308945507271}
   camFollowTarget: {fileID: 4512811379653127023}
+--- !u!114 &2124403734892092745
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6188535652055552110}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35a6e86dbc2364840924a07a9bccc58a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  boxSize: {x: 0.8, y: 0.2, z: 0.8}
+  maxDistance: 1.1
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  drawGizmo: 1
 --- !u!114 &4957203833760936166
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -213,7 +232,7 @@ CharacterController:
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0.15, z: 0}
+  m_Center: {x: 0, y: 0.35, z: 0}
 --- !u!136 &6887693944361417904
 CapsuleCollider:
   m_ObjectHideFlags: 0

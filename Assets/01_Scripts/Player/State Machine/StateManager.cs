@@ -70,7 +70,7 @@ public class StateManager : MonoBehaviour
         
         DebugExtension.ColorLog($"주변 적 스캔 : {CheckNearbyEnemy()}", "red");
         DebugExtension.ColorLog($"{currentState}", "cyan");
-        DebugExtension.ColorLog($"isGrounded : {player.controller.isGrounded}", "green");
+        DebugExtension.ColorLog($"isGrounded : {player.playerPhysics.IsGrounded()}", "green");
     }
     private void FixedUpdate()
     {

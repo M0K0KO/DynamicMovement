@@ -7,7 +7,7 @@ using UnityEngine;
 public class PlayerManager : MonoBehaviour
 {
     public PlayerInputManager playerInputManager { get; private set; }
-    public Rigidbody rb { get; private set; }
+    public PlayerPhysics playerPhysics { get; private set; }
     public CharacterController controller { get; private set; }
     public Collider playerCollider { get; private set; }
     public Animator animator { get; private set; }
@@ -28,7 +28,7 @@ public class PlayerManager : MonoBehaviour
     private void Awake()
     {
         playerInputManager = GetComponent<PlayerInputManager>();
-        rb = GetComponent<Rigidbody>();
+        playerPhysics = GetComponent<PlayerPhysics>();
         controller = GetComponent<CharacterController>();
         playerCollider = GetComponent<Collider>();
         animator = GetComponent<Animator>();

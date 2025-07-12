@@ -15,7 +15,7 @@ public class BaseState
 
     public virtual void TransitionCheck()
     {
-        if (manager.CheckDashInput() && !manager.isDashing && manager.player.controller.isGrounded)
+        if (manager.CheckDashInput() && !manager.isDashing && manager.player.playerPhysics.IsGrounded())
         {
             manager.ChangeState(manager.dash);
             return;

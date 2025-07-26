@@ -2,8 +2,11 @@
 
 public class EquipState : BaseState
 {
-    public EquipState(StateManager manager) : base(manager)
+    private GroundedState groundedState;
+    
+    public EquipState(StateManager manager, GroundedState groundedState) : base(manager)
     {
+        this.groundedState = groundedState;
     }
 
     public override void EnterState()
@@ -18,7 +21,7 @@ public class EquipState : BaseState
 
         if (stateInfo.IsName("Equip") && stateInfo.normalizedTime >= 0.8f)
         {
-            manager.ChangeState(manager.equippedIdle);
+            groundedState.ChangeSubState(groundedState.equippedIdleState);
         }
     }
 
@@ -28,11 +31,10 @@ public class EquipState : BaseState
 
     public override void TransitionCheck()
     {
-        base.TransitionCheck();
         
         if (manager.CheckMoveInput())
         {
-            manager.ChangeState(manager.sprint);
+            groundedState.ChangeSubState(groundedState.sprintState);
         }
     }
 

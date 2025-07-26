@@ -2,11 +2,16 @@ using UnityEngine;
 
 public class EquippedIdleState : BaseState
 {
+    private GroundedState groundedState;
+
+    public EquippedIdleState(StateManager stateManager, GroundedState groundedState) : base(stateManager)
+    {
+        this.groundedState = groundedState;
+    }
+
     private float unEquipTimer;
     private readonly float unEquipThreshold = 5f;
     
-    public EquippedIdleState(StateManager stateManager) : base(stateManager) {}
-
     public override void EnterState()
     {
         unEquipTimer = 0f;
@@ -25,7 +30,7 @@ public class EquippedIdleState : BaseState
                 unEquipTimer += Time.deltaTime;
             
             if (unEquipTimer >= unEquipThreshold)
-                manager.ChangeState(manager.unEquip);
+                groundedState.ChangeSubState(groundedState.unEquipState);
         }
         else
         {
@@ -40,11 +45,10 @@ public class EquippedIdleState : BaseState
 
     public override void TransitionCheck()
     {
-        base.TransitionCheck();
         
         if (manager.CheckMoveInput())
         {
-            manager.ChangeState(manager.sprint);
+            groundedState.ChangeSubState(groundedState.sprintState);
         }
     }
     

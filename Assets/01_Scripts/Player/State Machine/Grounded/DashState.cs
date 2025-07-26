@@ -2,7 +2,12 @@ using UnityEngine;
 
 public class DashState : BaseState
 {
-    public DashState(StateManager stateManager) : base(stateManager) {}
+    private GroundedState groundedState;
+    
+    public DashState(StateManager stateManager, GroundedState groundedState) : base(stateManager)
+    {
+        this.groundedState = groundedState;
+    }
 
     private float dashTimer;
     private Vector3 dashVelocity;
@@ -25,7 +30,6 @@ public class DashState : BaseState
     
     public override void TransitionCheck()
     {
-        base.TransitionCheck();
     }
     
     public override void ExitState()
@@ -36,13 +40,13 @@ public class DashState : BaseState
     #region DashLogic
     void StartDash()
     {
-        manager.isDashing = true;
+        groundedState.isDashing = true;
         dashTimer = 0f;
         manager.TriggerOnDashStartedEvent();
         manager.player.dashTrail.ActivateForDuration(manager.player.dashDuration - 0.15f);
         
-        Vector3 camForward = new Vector3(manager.playerCam.transform.forward.x, 0, manager.playerCam.transform.forward.z).normalized;
-        Vector3 camRight = new Vector3(manager.playerCam.transform.right.x, 0, manager.playerCam.transform.right.z).normalized;
+        Vector3 camForward = new Vector3(manager.player.playerCam.transform.forward.x, 0, manager.player.playerCam.transform.forward.z).normalized;
+        Vector3 camRight = new Vector3(manager.player.playerCam.transform.right.x, 0, manager.player.playerCam.transform.right.z).normalized;
         Vector3 moveDirection = camForward * manager.player.playerInputManager.moveInputDirection.z + camRight * manager.player.playerInputManager.moveInputDirection.x;
 
         if (moveDirection != Vector3.zero)
@@ -73,16 +77,16 @@ public class DashState : BaseState
 
     void EndDash()
     {
-        manager.isDashing = false;
+        groundedState.isDashing = false;
         manager.TriggerOnDashEndedEvent();
         
         if (manager.CheckMoveInput())
         {
-            manager.ChangeState(manager.sprint);
+            groundedState.ChangeSubState(groundedState.sprintState);
         }
         else
         {
-            manager.ChangeState(manager.CheckNearbyEnemy() ? manager.equippedIdle : manager.unEquippedIdle);
+            groundedState.ChangeSubState(manager.CheckNearbyEnemy() ? groundedState.equippedIdleState : groundedState.unEquippedIdleState);
         }
     }
     #endregion

@@ -2,7 +2,12 @@
 
 public class UnEquipState : BaseState
 {
-    public UnEquipState(StateManager manager) : base(manager) { }
+    private GroundedState groundedState;
+
+    public UnEquipState(StateManager manager, GroundedState groundedState) : base(manager)
+    {
+        this.groundedState = groundedState;
+    }
 
     public override void EnterState()
     {
@@ -16,7 +21,7 @@ public class UnEquipState : BaseState
 
         if (stateInfo.IsName("UnEquip") && stateInfo.normalizedTime >= 0.8f)
         {
-            manager.ChangeState(manager.unEquippedIdle);
+            groundedState.ChangeSubState(groundedState.unEquippedIdleState);
         }
     }
 
@@ -26,15 +31,13 @@ public class UnEquipState : BaseState
 
     public override void TransitionCheck()
     {
-        base.TransitionCheck();
-        
         if (manager.CheckMoveInput())
         {
-            manager.ChangeState(manager.sprint);
+            groundedState.ChangeSubState(groundedState.sprintState);
         }
     }
 
-    public override void ExitState()
+    public override void ExitState()    
     {
         
     }

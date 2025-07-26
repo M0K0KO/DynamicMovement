@@ -9,19 +9,16 @@ public class StateManager : MonoBehaviour
 {
     public PlayerManager player;
 
-    public UnEquipState unEquip;
-    public UnEquippedIdleState unEquippedIdle;
-    public EquipState equip;
-    public EquippedIdleState equippedIdle;
-    public SprintState sprint;
-    public DashState dash;
-    public NormalAttackState normalAttack;
+    public GroundedState groundedState;
+    public AerialState aerialState;
+    public AttackState attackState;
 
-    public Camera playerCam;
     public LayerMask enemyLayer;
 
     public BaseState currentState;
     private Collider[] nearByEnemies;
+
+    private Vector3 playerVelocity;
 
     public event Action OnDashStarted;
     public event Action OnDashEnded;
@@ -35,20 +32,13 @@ public class StateManager : MonoBehaviour
         OnDashEnded?.Invoke();
     }
     
-    public bool isDashing = false;
-    
-    public bool isAttacking = false;
-    public bool bufferedNormalAttackInput = false;
-
     private bool wasEnemyNearby = false;
-
     public float desiredDissolveValue = -1f;
     public float currentTargetDissolveValue = -1f;
 
     private void Awake()
     {
         player = GetComponent<PlayerManager>();
-        playerCam = Camera.main;
 
         nearByEnemies = new Collider[10];
     }
@@ -61,10 +51,9 @@ public class StateManager : MonoBehaviour
         currentState.UpdateState();
         currentState.TransitionCheck();
 
-
         if (!Mathf.Approximately(desiredDissolveValue, currentTargetDissolveValue))
         {
-            player.vfxManager.AdjustWeaponDissolveVFX(desiredDissolveValue, (currentState == normalAttack));
+            player.vfxManager.AdjustWeaponDissolveVFX(desiredDissolveValue, (currentState == attackState));
             currentTargetDissolveValue = desiredDissolveValue;
         }
         
@@ -78,16 +67,11 @@ public class StateManager : MonoBehaviour
     }
     private void InitializeStateManager()
     {
-        unEquip = new UnEquipState(this);
-        unEquippedIdle = new UnEquippedIdleState(this);
-        equip = new EquipState(this);
-        equippedIdle = new EquippedIdleState(this);
-        sprint = new SprintState(this);
-        dash = new DashState(this);
+        groundedState = new GroundedState(this);
+        aerialState = new AerialState(this);
+        attackState = new AttackState(this);
         
-        normalAttack = new NormalAttackState(this);
-
-        currentState = unEquippedIdle;
+        currentState = groundedState;
         currentState.EnterState();
     }
     public void ChangeState(BaseState newState)
@@ -99,25 +83,7 @@ public class StateManager : MonoBehaviour
     }
 
     
-    public void MovePlayer(float speed)
-    {
-        
-        Vector3 camForwardVector = new Vector3(playerCam.transform.forward.x, 0, playerCam.transform.forward.z).normalized;
-        Vector3 camRightVector = new Vector3(playerCam.transform.right.x, 0, playerCam.transform.right.z).normalized;
-        Vector3 moveDirection = camForwardVector * player.playerInputManager.moveInputDirection.z + camRightVector *player.playerInputManager.moveInputDirection.x;
 
-        Quaternion targetRotation = Quaternion.LookRotation(transform.forward);
-
-        if(moveDirection != Vector3.zero)
-        {
-            targetRotation = Quaternion.LookRotation(moveDirection);
-        }
-        
-        player.transform.rotation = Quaternion.Lerp(player.transform.rotation, targetRotation, player.rotationSpeed * Time.deltaTime);
-
-        Vector3 playerMovement = moveDirection * (speed * Time.deltaTime);
-        player.controller.Move(playerMovement);
-    }
 
     public bool CheckNearbyEnemy()
     {
@@ -135,12 +101,12 @@ public class StateManager : MonoBehaviour
     public bool CheckMoveInput() => player.playerInputManager.moveInputDirection != Vector3.zero;
     public bool CheckDashInput() => player.playerInputManager.dashInput;
     public bool CheckNormalAttackInput() => player.playerInputManager.normalAttackInput;
-    public void ClearBufferedNormalAttackInput()
-    {
-        bufferedNormalAttackInput = false;
-    }
     
+
+
     
-    //---------------------------------------------
+    //------------------------------------------------------------------------------------------------------------------------
+
+    
     
 }

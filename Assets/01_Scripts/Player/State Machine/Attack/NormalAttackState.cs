@@ -2,15 +2,20 @@
 
 public class NormalAttackState : BaseState
 {
-    private int comboCounter; 
+    private AttackState attackState;
+    
+    private int comboCounter;
 
-    public NormalAttackState(StateManager stateManager) : base(stateManager) {}
+    public NormalAttackState(StateManager stateManager, AttackState attackState) : base(stateManager)
+    {
+        this.attackState = attackState;
+    }
 
     public override void EnterState()
     {
         manager.desiredDissolveValue = 0f;
         
-        manager.isAttacking = true;
+        attackState.isAttacking = true;
         comboCounter = 1; 
         manager.player.animator.CrossFadeInFixedTime("NormalAttack" + comboCounter, 0.1f);
     }
@@ -23,17 +28,17 @@ public class NormalAttackState : BaseState
         {
             if (manager.player.playerInputManager.normalAttackInput)
             {
-                manager.bufferedNormalAttackInput = true;
+                attackState.bufferedNormalAttackInput = true;
                 manager.player.playerInputManager.ClearNormalAttackInput();
             }
         }
 
         if (stateInfo.normalizedTime >= 0.5f)
         {
-            if (comboCounter < 3 && manager.bufferedNormalAttackInput)
+            if (comboCounter < 3 && attackState.bufferedNormalAttackInput)
             {
                 comboCounter++;
-                manager.ClearBufferedNormalAttackInput();
+                attackState.ClearBufferedNormalAttackInput();
 
                 if (comboCounter == 2)
                 {
@@ -43,28 +48,14 @@ public class NormalAttackState : BaseState
                 {
                     manager.player.animator.CrossFadeInFixedTime("NormalAttack" + comboCounter, 0.2f, 0, 0f);
                 }
-
-                return;
-            }
-        }
-
-        if (stateInfo.normalizedTime >= 0.8f)
-        {
-            if (manager.CheckMoveInput())
-            {
-                manager.ChangeState(manager.sprint);
-            }
-            else
-            {
-                manager.ChangeState(manager.equippedIdle);
             }
         }
     }
 
     public override void ExitState()
     {
-        manager.isAttacking = false;
-        manager.ClearBufferedNormalAttackInput();
+        attackState.isAttacking = false;
+        attackState.ClearBufferedNormalAttackInput();
         comboCounter = 1; 
     }
     
@@ -72,6 +63,5 @@ public class NormalAttackState : BaseState
 
     public override void TransitionCheck()
     {
-        base.TransitionCheck();
     }
 }

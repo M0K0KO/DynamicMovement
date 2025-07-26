@@ -1,11 +1,17 @@
 public class SprintState : BaseState
 {
-    public SprintState(StateManager stateManager) : base(stateManager) {}
+    private GroundedState groundedState;
+
+    public SprintState(StateManager stateManager, GroundedState groundedState) : base(stateManager)
+    {
+        this.groundedState = groundedState;
+    }
     public override void EnterState()
     {
         manager.desiredDissolveValue = 0f;
         
-        if (manager.player.playerPhysics.IsGrounded()) manager.MovePlayer(manager.player.sprintSpeed);
+        if (manager.player.playerPhysics.IsGrounded()) 
+            manager.player.playerPhysics.MovePlayer(manager.player.sprintSpeed);
         manager.player.animator.CrossFadeInFixedTime("Sprint", 0.1f);
     }
 
@@ -14,7 +20,7 @@ public class SprintState : BaseState
         if (manager.player.playerPhysics.IsGrounded() && 
             manager.player.animator.GetCurrentAnimatorStateInfo(0).IsName("Sprint"))
         {
-            manager.MovePlayer(manager.player.sprintSpeed);
+            manager.player.playerPhysics.MovePlayer(manager.player.sprintSpeed);
         }
     }
 
@@ -25,11 +31,9 @@ public class SprintState : BaseState
     
     public override void TransitionCheck()
     {
-        base.TransitionCheck();
-        
         if (!manager.CheckMoveInput())
         {
-            manager.ChangeState(manager.equippedIdle);
+            groundedState.ChangeSubState(groundedState.equippedIdleState);
         }
     }
     

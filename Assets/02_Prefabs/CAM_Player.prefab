@@ -115,7 +115,7 @@ MonoBehaviour:
     SplineCurvature: 0.5
   RecenteringTarget: 2
   HorizontalAxis:
-    Value: -2.8339822
+    Value: 9.276508
     Center: 0
     Range: {x: -180, y: 180}
     Wrap: 1
@@ -127,7 +127,7 @@ MonoBehaviour:
   VerticalAxis:
     Value: -10
     Center: 17.5
-    Range: {x: -10, y: 45}
+    Range: {x: -10, y: 60}
     Wrap: 0
     Recentering:
       Enabled: 0
@@ -170,8 +170,8 @@ MonoBehaviour:
   Damping: {x: 0.5, y: 0.5}
   Lookahead:
     Enabled: 0
-    Time: 0
-    Smoothing: 0
+    Time: 0.05
+    Smoothing: 1
     IgnoreY: 0
 --- !u!114 &8002651433460060742
 MonoBehaviour:

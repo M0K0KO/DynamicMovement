@@ -2,7 +2,12 @@
 
 public class UnEquippedIdleState : BaseState
 {
-    public UnEquippedIdleState(StateManager stateManager) : base(stateManager) {}
+    private GroundedState groundedState;
+
+    public UnEquippedIdleState(StateManager stateManager, GroundedState groundedState) : base(stateManager)
+    {
+        this.groundedState = groundedState;
+    }
     public override void EnterState()
     {
         manager.player.animator.CrossFadeInFixedTime("UnEquippedIdle", 0.2f);
@@ -12,7 +17,7 @@ public class UnEquippedIdleState : BaseState
     {
         if (manager.CheckNearbyEnemy())
         {
-            manager.ChangeState(manager.equip);
+            groundedState.ChangeSubState(groundedState.equipState);
         }
     }
 
@@ -22,11 +27,9 @@ public class UnEquippedIdleState : BaseState
     
     public override void TransitionCheck()
     {
-        base.TransitionCheck();
-        
         if (manager.CheckMoveInput())
         {
-            manager.ChangeState(manager.sprint);
+            groundedState.ChangeSubState(groundedState.sprintState);
         }
     }
     

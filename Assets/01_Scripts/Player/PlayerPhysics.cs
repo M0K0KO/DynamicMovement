@@ -1,22 +1,72 @@
 using System;
+using System.Numerics;
+using Unity.Cinemachine;
 using UnityEngine;
+using Matrix4x4 = UnityEngine.Matrix4x4;
+using Quaternion = UnityEngine.Quaternion;
+using Vector3 = UnityEngine.Vector3;
 
 public class PlayerPhysics : MonoBehaviour
 {
     private PlayerManager player;
 
-    [Header("Boxcast Property")]
+
+    [Header("Boxcast Property")] 
+    [SerializeField] private Vector3 offset;
     [SerializeField] private Vector3 boxSize;
     [SerializeField] private float maxDistance;
     [SerializeField] private LayerMask groundLayer;
-
+    
+    
     [Header("Debug")]
     [SerializeField] private bool drawGizmo;
     
-    private void Awake()
+    public bool IsGrounded()
     {
-        player = GetComponent<PlayerManager>();
+        return Physics.BoxCast(transform.position + offset, boxSize, Vector3.down, transform.rotation, maxDistance, groundLayer);
     }
+    
+    public void MovePlayer(float speed, Vector3 additiveSpeed = default(Vector3))
+    {
+        
+        Vector3 camForwardVector = new Vector3(player.playerCam.transform.forward.x, 0, player.playerCam.transform.forward.z).normalized;
+        Vector3 camRightVector = new Vector3(player.playerCam.transform.right.x, 0, player.playerCam.transform.right.z).normalized;
+        Vector3 moveDirection = camForwardVector * player.playerInputManager.moveInputDirection.z + camRightVector *player.playerInputManager.moveInputDirection.x;
+
+        Quaternion targetRotation = Quaternion.LookRotation(transform.forward);
+
+        if(moveDirection != Vector3.zero)
+        {
+            targetRotation = Quaternion.LookRotation(moveDirection);
+        }
+        
+        player.transform.rotation = Quaternion.Lerp(player.transform.rotation, targetRotation, player.rotationSpeed * Time.deltaTime);
+
+        Vector3 horizontalMovement = moveDirection * speed;
+        player.controller.Move(horizontalMovement);
+    }
+
+    public Vector3 groundNormal()
+    {
+        RaycastHit groundHit;
+        if (Physics.Raycast(transform.position + offset, Vector3.down, out groundHit, maxDistance, groundLayer))
+        {
+            return groundHit.normal;
+        }
+        else
+        {
+            return Vector3.zero;
+        }
+    }
+
+    public Vector3 projectedDirection(Vector3 direction)
+    {
+        if (groundNormal() != Vector3.zero) return Vector3.ProjectOnPlane(direction, groundNormal());
+        else return direction;
+    }
+    
+    
+    //-------------------------------------------------------------------------------------------------------------------------------
     
     private void OnDrawGizmos()
     {
@@ -40,10 +90,5 @@ public class PlayerPhysics : MonoBehaviour
         // 충돌했다면 충돌 지점에, 아니라면 최대 거리에 그림
         Vector3 finalPosition = castDirection.normalized * (isHit ? hit.distance : maxDistance);
         Gizmos.DrawWireCube(finalPosition, boxSize);
-    }
-
-    public bool IsGrounded()
-    {
-        return Physics.BoxCast(transform.position, boxSize, -transform.up, transform.rotation, maxDistance, groundLayer);
     }
 }

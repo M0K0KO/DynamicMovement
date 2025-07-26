@@ -15,13 +15,17 @@ public class PlayerManager : MonoBehaviour
     public PlayerVFXManager vfxManager { get; private set; }
     
     public GameObject weapon;
+    public Camera playerCam;
     public Transform camFollowTarget;
 
     public float detectionRadius { get; private set; } = 20f;
     public float rotationSpeed { get; private set; } = 15f;
     public float sprintSpeed { get; private set; } = 15f;
+    public float aerialAdditiveSpeed { get; private set; } = 5f;
     public float dashForce { get; private set; } = 40f;
     public float dashDuration { get; private set; } = 0.5f;
+    public float gravityValue { get; private set; } = -30f;
+    public bool equipped = false;
 
 
     #region Initialization
@@ -34,6 +38,8 @@ public class PlayerManager : MonoBehaviour
         animator = GetComponent<Animator>();
         dashTrail = GetComponent<DashTrail>();
         vfxManager = GetComponent<PlayerVFXManager>();
+        
+        playerCam = Camera.main;
     }
     #endregion
 }

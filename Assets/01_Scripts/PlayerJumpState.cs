@@ -22,11 +22,11 @@ public class PlayerJumpState : BaseState
     public override void OnEnterState()
     {
         jumpBufferTime = 0;
-        
-        Debug.Log("Player Jump State");
+        stateManager.lockOnSlope = false;
         
         stateMachine.PlayAnimation(stateMachine.JUMP_0_START);
-        ApplyJumpForce();
+
+        stateMachine.StartCoroutine(StartJump(playerManager.jumpDuration));
     }
     
     public override void OnUpdateState()
@@ -67,22 +67,23 @@ public class PlayerJumpState : BaseState
     public override void OnExitState()
     {
         stateMachine.storedVelocityBeforeFall = playerManager.rb.linearVelocity;
-
+        stateManager.lockOnSlope = true;
         jumpBufferTime = 0f;
     }
 
-    private void ApplyJumpForce()
+    IEnumerator StartJump(float jumpDuration)
     {
-        if (inputManager.moveInput == Vector2.zero)
+        float elapsedTime = 0f;
+        while (true)
         {
-            playerManager.rb.linearVelocity = new Vector3(0f, 12f, 0f);
-        }
-        else
-        {
+            elapsedTime += Time.deltaTime;
+            if (elapsedTime >= jumpDuration) break;
+
             float horizontalVelocityX = playerManager.rb.linearVelocity.x;
             float horizontalVelocityZ = playerManager.rb.linearVelocity.z;
-
-            playerManager.rb.linearVelocity = new Vector3(horizontalVelocityX, 12f, horizontalVelocityZ);
+            Vector3 finalVelocity = new Vector3(horizontalVelocityX, playerManager.jumpSpeed, horizontalVelocityZ);
+            playerManager.rb.linearVelocity = finalVelocity;
+            yield return null;
         }
     }
     

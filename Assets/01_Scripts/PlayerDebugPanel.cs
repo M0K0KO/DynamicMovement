@@ -12,13 +12,14 @@ public class PlayerDebugPanel : MonoBehaviour
     void Update()
     {
         Vector3 horizontalVelocity = new Vector3(playerManager.rb.linearVelocity.x, 0, playerManager.rb.linearVelocity.z);
-        float velocity = horizontalVelocity.magnitude;
-        
+        float verticalVelocity = playerManager.rb.linearVelocity.y;
         
         display.SetText($" Grounded : {playerManager.StateManager.isGrounded}\n" +
                         $" TouchingWall : {playerManager.StateManager.isTouchingWall}\n" +
                         $" TouchingSlope : {playerManager.StateManager.isTouchingSlope}\n" +
-                         " horizontalVelocity : " + horizontalVelocity.magnitude.ToString("F2") + "\n" +
+                        $" horizontalVelocity : " + horizontalVelocity.magnitude.ToString("F2") + "\n" +
+                        $" verticalVelocity : " + verticalVelocity.ToString("F2") + "\n" +
+                        $" maxAirVelocity : " + playerManager.maxAirSpeed.ToString("F2") + "\n" +
                         $" Velocity : " + playerManager.rb.linearVelocity.magnitude.ToString("F2") + "\n" +
                         $" State : {DebugState(playerManager.StateMachine.currentState)}\n");
     }
@@ -37,6 +38,8 @@ public class PlayerDebugPanel : MonoBehaviour
                 return "Fall";
             case PlayerJumpState:
                 return "Jump";
+            case PlayerDashState:
+                return "Dash";
         }
 
         return "NULL";

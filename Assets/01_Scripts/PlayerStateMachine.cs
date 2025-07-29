@@ -13,6 +13,7 @@ public class PlayerStateMachine : MonoBehaviour
     public PlayerRunState runState { get; private set; }
     public PlayerFallState fallState { get; private set; }
     public PlayerJumpState jumpState { get; private set; }
+    public PlayerDashState dashState { get; private set; }
 
 
     public bool isRunning;
@@ -38,6 +39,10 @@ public class PlayerStateMachine : MonoBehaviour
     public readonly int JUMP_0_START = Animator.StringToHash("Player_Jump_0_Start");
     public readonly int JUMP_0_LOOP= Animator.StringToHash("Player_Jump_0_Loop");
     public readonly int JUMP_0_END = Animator.StringToHash("Player_Jump_0_End");
+    
+    public readonly int DASH_F_0 = Animator.StringToHash("Player_Dash_F_0");
+    public readonly int DASH_TO_RUN_F_0 = Animator.StringToHash("Player_Dash_to_Run_F_0");
+    public readonly int DASH_AIR_F_0 = Animator.StringToHash("Player_Dash_Air_F_0");
 
     
     public BaseState previousState;
@@ -59,6 +64,8 @@ public class PlayerStateMachine : MonoBehaviour
         
         currentState.OnUpdateState();
 
+        AdjustMaxSpeed();
+        
         CheckFall();
     }
 
@@ -72,6 +79,7 @@ public class PlayerStateMachine : MonoBehaviour
         PlayerInputManager.OnRunPerformed += HandleRunStart;
         PlayerInputManager.OnRunCanceled += HandleRunStop;
         PlayerInputManager.OnJumpPerformed += HandleJumpInput;
+        PlayerInputManager.OnDashPerformed += HandleDashInput;
     }
     
     private void OnDisable()
@@ -79,6 +87,7 @@ public class PlayerStateMachine : MonoBehaviour
         PlayerInputManager.OnRunPerformed -= HandleRunStart;
         PlayerInputManager.OnRunCanceled -= HandleRunStop;
         PlayerInputManager.OnJumpPerformed -= HandleJumpInput;
+        PlayerInputManager.OnDashPerformed -= HandleDashInput;
     }
     
     private void HandleRunStart()
@@ -93,7 +102,7 @@ public class PlayerStateMachine : MonoBehaviour
 
     private void HandleJumpInput()
     {
-        if (playerManager.StateManager.isGrounded 
+        if (playerManager.StateManager.isGrounded && currentState != jumpState
             && ((playerManager.StateManager.isTouchingSlope 
                  && playerManager.StateManager.currentSurfaceAngle <= playerManager.StateManager.maxClimbableSlopeAngle) 
                 || !playerManager.StateManager.isTouchingSlope))
@@ -101,7 +110,12 @@ public class PlayerStateMachine : MonoBehaviour
             ChangeState(jumpState);
         }
     }
-    
+
+    private void HandleDashInput()
+    {
+        if (currentState == dashState) return;
+        ChangeState(dashState);
+    }
 
     public void PlayAnimation(int animationHash, float durationTime = 0.2f, float timeOffset = 0f)
     {
@@ -123,6 +137,7 @@ public class PlayerStateMachine : MonoBehaviour
         runState = new PlayerRunState(this);
         fallState = new PlayerFallState(this);
         jumpState = new PlayerJumpState(this);
+        dashState = new PlayerDashState(this);
         
         currentState = idleState;
         currentState.OnEnterState();
@@ -136,11 +151,17 @@ public class PlayerStateMachine : MonoBehaviour
         if (!playerManager.StateManager.isGrounded 
             && currentState != jumpState 
             && currentState != fallState
+            && currentState != dashState
             && fallTime >= fallThreshold)
         {
             storedVelocityBeforeFall = playerManager.rb.linearVelocity;
             ChangeState(fallState);
         }
+    }
+
+    private void AdjustMaxSpeed()
+    {
+        if (playerManager.StateManager.isGrounded && currentState != dashState) playerManager.maxAirSpeed = playerManager.runSpeed;
     }
 
     #if UNITY_EDITOR
@@ -162,6 +183,9 @@ public class PlayerStateMachine : MonoBehaviour
                 break;
             case PlayerJumpState:
                 Debug.Log($"Current State : JumpState");
+                break;
+            case PlayerDashState:
+                Debug.Log($"Current State : DashState");
                 break;
         }
     }

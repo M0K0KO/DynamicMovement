@@ -48,6 +48,8 @@ public class PlayerStateManager : MonoBehaviour
     public Vector3 baseGroundNormal;
     public Vector3 forwardGroundNormal;
 
+    public bool lockOnSlope { get; set; } = true;
+
     private void Awake()
     {
         playerManager = GetComponent<PlayerManager>();
@@ -124,8 +126,6 @@ public class PlayerStateManager : MonoBehaviour
         {
             forwardGroundNormal = hit.normal.normalized;
         }
-        
-        Debug.Log($"forward Magnitude : {forwardGroundNormal.magnitude}");
     }
 
     private void CheckSlope()
@@ -150,7 +150,7 @@ public class PlayerStateManager : MonoBehaviour
                     forward = Vector3.zero;
                     down = -transform.up.normalized;
                 }
-                else // 오를 수 있는 경사의 Slope
+                else if (lockOnSlope)
                 {
                     Vector3 referenceNormal;
                     if ((baseGroundNormal - Vector3.up).sqrMagnitude < 0.05f || (baseGroundNormal - forwardGroundNormal).sqrMagnitude > 0.05f)
@@ -163,7 +163,6 @@ public class PlayerStateManager : MonoBehaviour
                     }
 
                     forward = Vector3.ProjectOnPlane(horizontalDirection, referenceNormal).normalized;
-            
                     down = -referenceNormal.normalized;
                 }
             }
@@ -171,8 +170,6 @@ public class PlayerStateManager : MonoBehaviour
         else // 공중이라면?
         {
             isTouchingSlope = false;
-            forward = transform.forward.normalized;
-            down = -transform.up.normalized;
         }
         
     }

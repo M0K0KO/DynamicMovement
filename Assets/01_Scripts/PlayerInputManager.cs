@@ -11,6 +11,7 @@ public class PlayerInputManager : MonoBehaviour
     private InputAction MoveAction;
     private InputAction RunAction;
     private InputAction JumpAction;
+    private InputAction DashAction;
 
     [Header("Input Properties")] 
     public Vector2 moveInput { get; private set; }
@@ -18,6 +19,7 @@ public class PlayerInputManager : MonoBehaviour
     public static event Action OnRunPerformed;
     public static event Action OnRunCanceled;
     public static event Action OnJumpPerformed;
+    public static event Action OnDashPerformed;
 
     private void Awake()
     {
@@ -27,6 +29,7 @@ public class PlayerInputManager : MonoBehaviour
         MoveAction = playerInput.Normal.Move;
         RunAction = playerInput.Normal.Run;
         JumpAction = playerInput.Normal.Jump;
+        DashAction = playerInput.Normal.Dash;
     }
 
     private void OnEnable()
@@ -38,6 +41,7 @@ public class PlayerInputManager : MonoBehaviour
         RunAction.performed += OnRun_Performed;
         RunAction.canceled += OnRun_Canceled;
         JumpAction.performed += OnJump_Performed;
+        DashAction.performed += OnDash_Performed;
     }
 
 
@@ -49,6 +53,7 @@ public class PlayerInputManager : MonoBehaviour
         RunAction.performed -= OnRun_Performed;
         RunAction.canceled -= OnRun_Canceled;
         JumpAction.performed -= OnJump_Performed;
+        DashAction.performed -= OnDash_Performed;
         
         playerInput.Disable();
     }
@@ -68,8 +73,13 @@ public class PlayerInputManager : MonoBehaviour
         OnRunCanceled?.Invoke();
     }
     
-    private void OnJump_Performed(InputAction.CallbackContext obj)
+    private void OnJump_Performed(InputAction.CallbackContext ctx)
     {
         OnJumpPerformed?.Invoke();
+    }
+
+    private void OnDash_Performed(InputAction.CallbackContext ctx)
+    {
+        OnDashPerformed?.Invoke();
     }
 }

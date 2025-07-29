@@ -11,7 +11,7 @@ public class PlayerCameraManager : MonoBehaviour
 
     [SerializeField] private float fovLerpSpeed;
 
-    private float maxSpeed = 10f;
+    private float maxSpeed = 17f;
     
     private void Update()
     {

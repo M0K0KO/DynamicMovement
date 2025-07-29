@@ -24,7 +24,6 @@ public class PlayerWalkState : BaseState
     {
         if (stateMachine.previousState == stateMachine.fallState && stateMachine.shouldPlayJumpEnd)
         {
-            Debug.Log("ㅎㅇ");
             stateMachine.shouldPlayJumpEnd = false;
             coroutine = stateMachine.StartCoroutine(PlayJumpEndAndWalk());
         }

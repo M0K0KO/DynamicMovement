@@ -23,9 +23,10 @@ public class PlayerJumpState : BaseState
     {
         jumpBufferTime = 0;
         stateManager.lockOnSlope = false;
+
+        if (stateMachine.previousState == stateMachine.walkState) playerManager.maxAirSpeed = playerManager.walkSpeed;
         
         stateMachine.PlayAnimation(stateMachine.JUMP_0_START);
-
         stateMachine.StartCoroutine(StartJump(playerManager.jumpDuration));
     }
     
@@ -61,12 +62,13 @@ public class PlayerJumpState : BaseState
     
     public override void OnFixedUpdateState()
     {
-        HandleAirControl();
+        HandleNormalAirControl();
     }
     
     public override void OnExitState()
     {
         stateMachine.storedVelocityBeforeFall = playerManager.rb.linearVelocity;
+        playerManager.maxAirSpeed = playerManager.runSpeed;
         stateManager.lockOnSlope = true;
         jumpBufferTime = 0f;
     }
@@ -87,7 +89,7 @@ public class PlayerJumpState : BaseState
         }
     }
     
-    private void HandleAirControl()
+    private void HandleNormalAirControl()
     {
         float targetAngle = Mathf.Atan2(
             inputManager.moveInput.x,

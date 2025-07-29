@@ -17,7 +17,8 @@ public class PlayerManager : MonoBehaviour
     
     public float walkRotationSpeed = 8f;
     public float walkSpeed = 4.5f;
-    
+
+    public float lockOnRunSpeed = 7.5f;
     public float runRotationSpeed = 6f;
     public float runSpeed = 10f;
 
@@ -30,6 +31,10 @@ public class PlayerManager : MonoBehaviour
 
     public float dashDuration = 0.3f;
     public float dashSpeed = 20f;
+    public float lockOnDashDuration = 0.2f;
+    public float lockOnDashSpeed = 10f;
+
+    public float enemyDetectionRange = 15f;
     
 
     private void Awake()

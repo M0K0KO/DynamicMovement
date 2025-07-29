@@ -45,7 +45,7 @@ public class PlayerFallState : BaseState
     
     public override void OnFixedUpdateState()
     {
-        HandleAirControl();
+        HandleNormalAirControl();
     }
     
     public override void OnExitState()
@@ -59,7 +59,7 @@ public class PlayerFallState : BaseState
         playerManager.rb.linearVelocity = stateMachine.storedVelocityBeforeFall;
     }
     
-    private void HandleAirControl()
+    private void HandleNormalAirControl()
     {
         float targetAngle = Mathf.Atan2(
             inputManager.moveInput.x,

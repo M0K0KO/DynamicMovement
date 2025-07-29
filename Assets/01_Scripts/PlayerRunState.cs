@@ -50,8 +50,8 @@ public class PlayerRunState : BaseState
 
     public override void OnFixedUpdateState()
     {
-        HandleRotation();
-        HandleMovement();
+        HandleNormalRotation();
+        HandleNormalMovement();
     }
 
     public override void OnExitState()
@@ -59,7 +59,7 @@ public class PlayerRunState : BaseState
         stateMachine.StopCoroutine(PlayJumpEndAndRun());
     }
 
-    private void HandleRotation()
+    private void HandleNormalRotation()
     {
         float targetAngle = Mathf.Atan2(
             inputManager.moveInput.x,
@@ -78,12 +78,13 @@ public class PlayerRunState : BaseState
 
         playerManager.rb.MoveRotation(newRotation);
     }
-    
-    private void HandleMovement()
+    private void HandleNormalMovement()
     {
         Vector3 finalMoveDirection = stateManager.forward;
 
-        Vector3 targetVelocity = finalMoveDirection * playerManager.runSpeed;
+        float speed = stateMachine.isLockedOn ? playerManager.lockOnRunSpeed : playerManager.runSpeed;
+        
+        Vector3 targetVelocity = finalMoveDirection * speed;
 
         Vector3 currentVelocity = playerManager.rb.linearVelocity;
 
@@ -95,7 +96,6 @@ public class PlayerRunState : BaseState
 
         playerManager.rb.linearVelocity = newVelocity;
     }
-
     private IEnumerator PlayJumpEndAndRun()
     {
         stateMachine.PlayAnimation(stateMachine.JUMP_0_END);

@@ -1,8 +1,5 @@
-using System;
-using System.Numerics;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.Serialization;
+using UnityEngine.XR;
 using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
 
@@ -40,6 +37,8 @@ public class PlayerStateManager : MonoBehaviour
     public float currentSurfaceAngle { get; private set; }
     public bool isTouchingSlope { get; private set; }
 
+
+    public Vector3 desiredForward;
     public Vector3 forward;
     public Vector3 globalForward;
     public Vector3 down;
@@ -59,6 +58,8 @@ public class PlayerStateManager : MonoBehaviour
 
     private void FixedUpdate()
     {
+        CalculateRelativeDirection();
+        
         CheckGrounded();
         CheckWall();
 
@@ -66,6 +67,18 @@ public class PlayerStateManager : MonoBehaviour
         CheckSlope();
 
         ApplyGravity();
+    }
+
+    private void CalculateRelativeDirection()
+    {
+        Vector2 input = playerManager.InputManager.moveInput;
+        Vector3 camForward = playerManager.playerCam.transform.forward;
+        Vector3 camRight = playerManager.playerCam.transform.right;
+        camForward.y = 0;
+        camForward.Normalize();
+        camRight.y = 0;
+        camRight.Normalize();
+        desiredForward = (camForward * input.y) + (camRight * input.x);
     }
 
 
@@ -111,7 +124,7 @@ public class PlayerStateManager : MonoBehaviour
     private void UpdateGroundNormals()
     {
         Vector3 currentPos = transform.position + playerManager.playerCollider.center;
-        Vector3 forwardPos = currentPos + new Vector3(transform.forward.x, 0, transform.forward.z).normalized * forwardRayOffset;
+        Vector3 forwardPos = currentPos + new Vector3(desiredForward.x, 0, desiredForward.z).normalized * forwardRayOffset;
         
         // baseGroundNormal
         if (Physics.Raycast(currentPos,
@@ -137,7 +150,7 @@ public class PlayerStateManager : MonoBehaviour
             && (forwardGroundNormal - Vector3.up).sqrMagnitude < 0.05f // forward가 평지?
             );
         
-        Vector3 horizontalDirection = new Vector3(transform.forward.x, 0, transform.forward.z).normalized;
+        Vector3 horizontalDirection = new Vector3(desiredForward.x, 0, desiredForward.z).normalized;
         forward = horizontalDirection;
         down = -transform.up.normalized;
         
@@ -203,7 +216,7 @@ public class PlayerStateManager : MonoBehaviour
         {
             Vector3 currentPos = transform.position + playerManager.playerCollider.center;
             Vector3 forwardPos = currentPos +
-                                 new Vector3(transform.forward.x, 0, transform.forward.z).normalized * forwardRayOffset;
+                                 new Vector3(desiredForward.x, 0, desiredForward.z).normalized * forwardRayOffset;
 
             Gizmos.color = Physics.CheckSphere(
                 transform.position - new Vector3(0, originalColliderHeight / 2f, 0) - groundCheckOffset,

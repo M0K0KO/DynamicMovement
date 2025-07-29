@@ -1,4 +1,5 @@
 using System;
+using Moko;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -19,10 +20,13 @@ public class PlayerStateMachine : MonoBehaviour
     public bool isRunning;
     public bool shouldPlayJumpEnd;
 
-    
     private float fallTime = 0;
     public float fallThreshold = 0.3f;
     public Vector3 storedVelocityBeforeFall;
+
+    public LayerMask enemyMask;
+    public bool isLockedOn;
+    public GameObject lockOnTarget;
 
 
     public readonly int IDLE_ANIMATION = Animator.StringToHash("Player_Idle");
@@ -43,6 +47,15 @@ public class PlayerStateMachine : MonoBehaviour
     public readonly int DASH_F_0 = Animator.StringToHash("Player_Dash_F_0");
     public readonly int DASH_TO_RUN_F_0 = Animator.StringToHash("Player_Dash_to_Run_F_0");
     public readonly int DASH_AIR_F_0 = Animator.StringToHash("Player_Dash_Air_F_0");
+    
+    
+    public readonly int COMBAT_WALK = Animator.StringToHash("Player_Combat_Walk");
+    public readonly int HORIZONTAL_PARAM = Animator.StringToHash("Horizontal");
+    public readonly int VERTICAL_PARAM = Animator.StringToHash("Vertical");
+
+    public readonly int COMBAT_DASH = Animator.StringToHash("Player_Combat_Dash");
+    public readonly int DASHHORIZONTAL_PARAM = Animator.StringToHash("DashHorizontal");
+    public readonly int DASHVERTICAL_PARAM = Animator.StringToHash("DashVertical");
 
     
     public BaseState previousState;
@@ -80,6 +93,7 @@ public class PlayerStateMachine : MonoBehaviour
         PlayerInputManager.OnRunCanceled += HandleRunStop;
         PlayerInputManager.OnJumpPerformed += HandleJumpInput;
         PlayerInputManager.OnDashPerformed += HandleDashInput;
+        PlayerInputManager.OnLockOnPerformed += HandleLockOnInput;
     }
     
     private void OnDisable()
@@ -88,6 +102,7 @@ public class PlayerStateMachine : MonoBehaviour
         PlayerInputManager.OnRunCanceled -= HandleRunStop;
         PlayerInputManager.OnJumpPerformed -= HandleJumpInput;
         PlayerInputManager.OnDashPerformed -= HandleDashInput;
+        PlayerInputManager.OnLockOnPerformed -= HandleLockOnInput;
     }
     
     private void HandleRunStart()
@@ -115,6 +130,26 @@ public class PlayerStateMachine : MonoBehaviour
     {
         if (currentState == dashState) return;
         ChangeState(dashState);
+    }
+
+    private void HandleLockOnInput()
+    {
+        if (isLockedOn) // 이미 lock on 중인 경우
+        {
+            isLockedOn = false;
+            lockOnTarget = null;
+        }
+        else // lock on 을 안하고 있는 경우
+        {
+            if (CheckNearbyEnemies(out GameObject targetEnemy))
+            {
+                isLockedOn = true;
+                lockOnTarget = targetEnemy;
+                StopAllCoroutines();
+                if (currentState == idleState) PlayAnimation(IDLE_COMBAT_ANIMATION);
+                else if (currentState == walkState) PlayAnimation(COMBAT_WALK, 0.1f);
+            }
+        }
     }
 
     public void PlayAnimation(int animationHash, float durationTime = 0.2f, float timeOffset = 0f)
@@ -161,7 +196,42 @@ public class PlayerStateMachine : MonoBehaviour
 
     private void AdjustMaxSpeed()
     {
-        if (playerManager.StateManager.isGrounded && currentState != dashState) playerManager.maxAirSpeed = playerManager.runSpeed;
+        if (playerManager.StateManager.isGrounded && currentState != dashState && currentState != jumpState) playerManager.maxAirSpeed = playerManager.runSpeed;
+    }
+
+    // 화면 정중앙과 가장 가까운 enemy gameObject를 반환해줌
+    private bool CheckNearbyEnemies(out GameObject enemy)
+    {
+        Collider[] nearbyEnemies = new Collider[20];
+        int enemyCount = Physics.OverlapSphereNonAlloc(transform.position + playerManager.playerCollider.center,
+            playerManager.enemyDetectionRange, nearbyEnemies, enemyMask);
+
+        if (enemyCount > 0)
+        {
+            Vector2 screenCenter = new Vector2(Screen.width / 2, Screen.height / 2);
+            Vector2 targetScreenPosition = Camera.main.WorldToScreenPoint(nearbyEnemies[0].transform.position);
+            float nearestDistance = Vector2.Distance(screenCenter, targetScreenPosition);
+            Collider nearestEnemy = nearbyEnemies[0];
+            
+            for (int i = 1; i < enemyCount; i++)
+            {
+                screenCenter = new Vector2(Screen.width / 2, Screen.height / 2);
+                targetScreenPosition = Camera.main.WorldToScreenPoint(nearbyEnemies[i].transform.position);
+                float distance = Vector2.Distance(screenCenter, targetScreenPosition);
+
+                if (distance < nearestDistance)
+                {
+                    nearestEnemy = nearbyEnemies[i];
+                    nearestDistance = distance;
+                }
+            }
+
+            enemy = nearestEnemy.gameObject;
+            return true;
+        }
+
+        enemy = null;
+        return false;
     }
 
     #if UNITY_EDITOR
@@ -187,6 +257,21 @@ public class PlayerStateMachine : MonoBehaviour
             case PlayerDashState:
                 Debug.Log($"Current State : DashState");
                 break;
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (Application.isPlaying)
+        {
+            Gizmos.color = CheckNearbyEnemies(out GameObject targetEnemy) ? Color.red : Color.green;
+            Gizmos.DrawWireSphere(transform.position + playerManager.playerCollider.center, playerManager.enemyDetectionRange);
+
+            if (lockOnTarget != null && isLockedOn)
+            {
+                Gizmos.color = Color.cyan;
+                Gizmos.DrawWireSphere(lockOnTarget.transform.position + Vector3.up * 2f, 0.3f);
+            }
         }
     }
     #endif

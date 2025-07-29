@@ -20,22 +20,43 @@ public class PlayerWalkState : BaseState
 
     private Coroutine coroutine;
 
+    private float currentHorizontal;
+    private float currentVertical;
+    
     public override void OnEnterState()
     {
-        if (stateMachine.previousState == stateMachine.fallState && stateMachine.shouldPlayJumpEnd)
+        if (stateMachine.isLockedOn)
         {
-            stateMachine.shouldPlayJumpEnd = false;
-            coroutine = stateMachine.StartCoroutine(PlayJumpEndAndWalk());
+            stateMachine.PlayAnimation(stateMachine.COMBAT_WALK);
         }
         else
         {
-            stateMachine.PlayAnimation(stateMachine.WALK_LOOP_F_0, 0.3f);
+            if (stateMachine.previousState == stateMachine.fallState && stateMachine.shouldPlayJumpEnd)
+            {
+                stateMachine.shouldPlayJumpEnd = false;
+                coroutine = stateMachine.StartCoroutine(PlayJumpEndAndWalk());
+            }
+            else
+            {
+                stateMachine.PlayAnimation(stateMachine.WALK_LOOP_F_0, 0.3f);
+            }
         }
-
     }
 
     public override void OnUpdateState()
     {
+        if (stateMachine.isLockedOn)
+        {
+            float horizontalParam = playerManager.animator.GetFloat(stateMachine.HORIZONTAL_PARAM);
+            float verticalParam = playerManager.animator.GetFloat(stateMachine.VERTICAL_PARAM);
+
+            float smoothedHorizontal = Mathf.SmoothDamp(horizontalParam, inputManager.moveInput.x, ref currentHorizontal, 0.1f);
+            float smoothedVertical = Mathf.SmoothDamp(verticalParam, inputManager.moveInput.y, ref currentVertical, 0.1f);
+            
+            playerManager.animator.SetFloat(stateMachine.HORIZONTAL_PARAM, smoothedHorizontal);
+            playerManager.animator.SetFloat(stateMachine.VERTICAL_PARAM, smoothedVertical);
+        }
+        
         if (stateMachine.isRunning)
         {
             stateMachine.ChangeState(stateMachine.idleState);
@@ -52,8 +73,16 @@ public class PlayerWalkState : BaseState
 
     public override void OnFixedUpdateState()
     {
-        HandleRotation();
-        HandleMovement();
+        if (stateMachine.isLockedOn)
+        {
+            HandleLockOnRotation();
+        }
+        else
+        {
+            HandleNormalRotation();
+        }           
+        HandleNormalMovement();
+
     }
 
     public override void OnExitState()
@@ -61,7 +90,7 @@ public class PlayerWalkState : BaseState
         stateMachine.StopCoroutine(PlayJumpEndAndWalk());
     }
 
-    private void HandleRotation()
+    private void HandleNormalRotation()
     {
         float targetAngle = Mathf.Atan2(
             inputManager.moveInput.x,
@@ -81,12 +110,27 @@ public class PlayerWalkState : BaseState
         playerManager.rb.MoveRotation(newRotation);
     }
 
-    private void HandleMovement()
+    private void HandleLockOnRotation()
+    {
+        Vector3 directionToTarget = stateMachine.lockOnTarget.transform.position - playerManager.transform.position;
+        directionToTarget.y = 0;
+        directionToTarget.Normalize(); 
+        
+        Quaternion targetRotation = Quaternion.LookRotation(directionToTarget);
+
+        Quaternion newRotation = Quaternion.Slerp(
+            playerManager.rb.rotation,
+            targetRotation,
+            playerManager.walkRotationSpeed * Time.fixedDeltaTime 
+        );
+
+        playerManager.rb.MoveRotation(newRotation);
+    }
+    
+    private void HandleNormalMovement()
     {
         Vector3 finalMoveDirection = stateManager.forward;
-
         Vector3 targetVelocity = finalMoveDirection * playerManager.walkSpeed;
-
         Vector3 currentVelocity = playerManager.rb.linearVelocity;
 
         Vector3 newVelocity = Vector3.Lerp(
@@ -97,7 +141,7 @@ public class PlayerWalkState : BaseState
 
         playerManager.rb.linearVelocity = newVelocity;
     }
-
+    
     private IEnumerator PlayJumpEndAndWalk()
     {
         stateMachine.PlayAnimation(stateMachine.JUMP_0_END);

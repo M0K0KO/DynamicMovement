@@ -22,22 +22,30 @@ public class PlayerIdleState : BaseState
     {
         stateMachine.playerManager.rb.linearVelocity = Vector3.zero;
 
-        if (stateMachine.previousState == stateMachine.walkState)
-            stopCoroutine = stateMachine.StartCoroutine(PlayWalkStopAndIdle());
-        else if (stateMachine.previousState == stateMachine.runState)
+        if (stateMachine.isLockedOn)
         {
-            stopCoroutine = stateMachine.StartCoroutine(PlayRunStopAndIdle());
-        }
-        else if (stateMachine.previousState == stateMachine.fallState && stateMachine.shouldPlayJumpEnd)
-        {
-            stateMachine.shouldPlayJumpEnd = false;
-            stopCoroutine = stateMachine.StartCoroutine(PlayJumpEndAndIdle());
+            stateMachine.PlayAnimation(stateMachine.IDLE_COMBAT_ANIMATION);
         }
         else
         {
-            stateMachine.PlayAnimation(stateMachine.IDLE_ANIMATION);
+            if (stateMachine.previousState == stateMachine.walkState)
+                stopCoroutine = stateMachine.StartCoroutine(PlayWalkStopAndIdle());
+            else if (stateMachine.previousState == stateMachine.runState)
+            {
+                stopCoroutine = stateMachine.StartCoroutine(PlayRunStopAndIdle());
+            }
+            else if (stateMachine.previousState == stateMachine.fallState && stateMachine.shouldPlayJumpEnd)
+            {
+                stateMachine.shouldPlayJumpEnd = false;
+                stopCoroutine = stateMachine.StartCoroutine(PlayJumpEndAndIdle());
+            }
+            else
+            {
+                stateMachine.PlayAnimation(stateMachine.IDLE_ANIMATION);
+            }
+
+            playerManager.rb.linearVelocity = Vector3.zero;
         }
-        playerManager.rb.linearVelocity = Vector3.zero;
     }
     
     public override void OnUpdateState()

@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5522371516575353246}
   - component: {fileID: 5523847926390726183}
   - component: {fileID: 8216240600490704364}
+  - component: {fileID: 6528475420861707080}
   m_Layer: 0
   m_Name: Punch2
   m_TagString: Untagged
@@ -4842,6 +4843,20 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
+--- !u!114 &6528475420861707080
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2196670090692176994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0500aa563e87f154e939dfcc52f4da23, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  poolTag: Punch2
+  lifeTime: 2
 --- !u!1 &3186627705978075086
 GameObject:
   m_ObjectHideFlags: 0

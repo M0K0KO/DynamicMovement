@@ -130715,6 +130715,13 @@ AnimationClip:
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
+  - time: 0.73333335
+    functionName: EnableHitBox
+    data: GroundImpact
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
   - time: 0.76666665
     functionName: PlayVFX
     data: GroundImpact1:ComboAttack:7:0
@@ -130725,6 +130732,13 @@ AnimationClip:
   - time: 0.76666665
     functionName: ResetLinearVelocity
     data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 1
+    functionName: DisableHitBox
+    data: GroundImpact
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0

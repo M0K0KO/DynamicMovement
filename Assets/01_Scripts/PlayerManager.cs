@@ -1,6 +1,7 @@
 using System;
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.VFX;
 
 public class PlayerManager : MonoBehaviour
 {
@@ -13,6 +14,7 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] public PlayerInputManager InputManager;
     [SerializeField] public PlayerStateMachine StateMachine;
     [SerializeField] public PlayerVFXManager VFXManager;
+    [SerializeField] public PlayerCombatManager CombatManager;
 
     public float moveLerpSpeed = 5f;
     
@@ -44,5 +46,6 @@ public class PlayerManager : MonoBehaviour
         playerCollider = GetComponent<CapsuleCollider>();
         playerCam = Camera.main;
         animator = GetComponent<Animator>();
+        VFXManager = GetComponent<PlayerVFXManager>();
     }
 }

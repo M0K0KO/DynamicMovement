@@ -1,9 +1,12 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 public class PlayerVFXManager : MonoBehaviour
 {
+    private PlayerManager playerManager;
+    
     public List<VFXSequenceData> vfxSequences;
 
     // (선택사항) 빠른 접근을 위한 딕셔너리
@@ -11,6 +14,7 @@ public class PlayerVFXManager : MonoBehaviour
 
     private void Awake()
     {
+        playerManager = GetComponent<PlayerManager>();
         // 리스트에 있는 데이터를 딕셔너리로 변환하여 쉽게 찾을 수 있도록 준비합니다.
         // vfxTag를 Key로 사용합니다.
         vfxSequenceDictionary = vfxSequences.ToDictionary(data => data.sequenceName, data => data);
@@ -44,7 +48,7 @@ public class PlayerVFXManager : MonoBehaviour
         {
             // 1: 플레이어를 추적 (자식으로 만듦)
             // 로컬 좌표와 부모(this.transform)를 그대로 전달합니다.
-            VFXPoolManager.Instance.GetFromPool(poolTag, localPos, localRot, this.transform, startTime);
+            VFXPoolManager.Instance.GetFromPool(poolTag, localPos, localRot, transform, startTime);
         }
         else
         {

@@ -63,6 +63,7 @@ public class PlayerAttackState : BaseState
         comboCount = 0;
         bufferedInput = false;
         playerManager.animator.ResetTrigger(stateMachine.NEXT_COMBO_TRIGGER);
+        playerManager.CombatManager.DisableAllHitBox();
         playerManager.rb.linearVelocity = Vector3.zero;
     }
 

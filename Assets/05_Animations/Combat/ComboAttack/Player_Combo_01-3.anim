@@ -121356,6 +121356,13 @@ AnimationClip:
     intParameter: 0
     messageOptions: 0
   - time: 0.06666667
+    functionName: EnableHitBox
+    data: LeftHand
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.06666667
     functionName: PlayVFX
     data: Punch3:ComboAttack:3:1
     objectReferenceParameter: {fileID: 0}
@@ -121369,9 +121376,23 @@ AnimationClip:
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
+  - time: 0.2
+    functionName: DisableHitBox
+    data: LeftHand
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
   - time: 0.23333333
     functionName: PlayVFX
     data: Punch3:ComboAttack:4:1
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.23333333
+    functionName: EnableHitBox
+    data: RightHand
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0
@@ -121397,6 +121418,13 @@ AnimationClip:
     floatParameter: 10
     intParameter: 0
     messageOptions: 0
+  - time: 0.46666667
+    functionName: DisableHitBox
+    data: RightHand
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
   - time: 0.5
     functionName: ResetLinearVelocity
     data: 
@@ -121411,7 +121439,21 @@ AnimationClip:
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
-  - time: 0.93333334
+  - time: 0.53333336
+    functionName: EnableHitBox
+    data: LeftLeg
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.6333333
+    functionName: DisableHitBox
+    data: LeftLeg
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 1.3333334
     functionName: CloseComboWindow
     data: 
     objectReferenceParameter: {fileID: 0}

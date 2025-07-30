@@ -121362,6 +121362,13 @@ AnimationClip:
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
+  - time: 0.2
+    functionName: EnableHitBox
+    data: LeftHand
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
   - time: 0.23333333
     functionName: ResetLinearVelocity
     data: 
@@ -121376,7 +121383,28 @@ AnimationClip:
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
-  - time: 1
+  - time: 0.3
+    functionName: EnableHitBox
+    data: RightHand
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.3
+    functionName: DisableHitBox
+    data: LeftHand
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.43333334
+    functionName: DisableHitBox
+    data: RightHand
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 1.3333334
     functionName: CloseComboWindow
     data: 
     objectReferenceParameter: {fileID: 0}

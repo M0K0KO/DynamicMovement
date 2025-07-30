@@ -41,6 +41,7 @@ public class PlayerChargeAttackState : BaseState
 
     public override void OnExitState()
     {
+        playerManager.CombatManager.DisableAllHitBox();
         chargeAttackTime = 0f;
     }
     

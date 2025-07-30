@@ -12,6 +12,7 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] public PlayerStateManager StateManager;
     [SerializeField] public PlayerInputManager InputManager;
     [SerializeField] public PlayerStateMachine StateMachine;
+    [SerializeField] public PlayerVFXManager VFXManager;
 
     public float moveLerpSpeed = 5f;
     

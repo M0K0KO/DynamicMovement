@@ -40,6 +40,10 @@ public class PlayerDebugPanel : MonoBehaviour
                 return "Jump";
             case PlayerDashState:
                 return "Dash";
+            case PlayerAttackState:
+                return "Attack";
+            case PlayerChargeAttackState:
+                return "ChargeAttack";
         }
 
         return "NULL";

@@ -20,21 +20,43 @@ public class PlayerRunState : BaseState
 
     private Coroutine coroutine;
     
+    private float currentHorizontal;
+    private float currentVertical;
+    
     public override void OnEnterState()
     {
-        if (stateMachine.previousState == stateMachine.fallState && stateMachine.shouldPlayJumpEnd)
+        if (stateMachine.isLockedOn)
         {
-            stateMachine.shouldPlayJumpEnd = false;
-            coroutine = stateMachine.StartCoroutine(PlayJumpEndAndRun());
+            stateMachine.PlayAnimation(stateMachine.COMBAT_RUN);
         }
         else
         {
-            stateMachine.PlayAnimation(stateMachine.RUN_START_F_0, 0.3f);
+            if (stateMachine.previousState == stateMachine.fallState && stateMachine.shouldPlayJumpEnd)
+            {
+                stateMachine.shouldPlayJumpEnd = false;
+                coroutine = stateMachine.StartCoroutine(PlayJumpEndAndRun());
+            }
+            else
+            {
+                stateMachine.PlayAnimation(stateMachine.RUN_START_F_0, 0.3f);
+            }
         }
     }
 
     public override void OnUpdateState()
     {
+        if (stateMachine.isLockedOn)
+        {
+            float horizontalParam = playerManager.animator.GetFloat(stateMachine.HORIZONTAL_PARAM);
+            float verticalParam = playerManager.animator.GetFloat(stateMachine.VERTICAL_PARAM);
+
+            float smoothedHorizontal = Mathf.SmoothDamp(horizontalParam, inputManager.moveInput.x, ref currentHorizontal, 0.1f);
+            float smoothedVertical = Mathf.SmoothDamp(verticalParam, inputManager.moveInput.y, ref currentVertical, 0.1f);
+            
+            playerManager.animator.SetFloat(stateMachine.HORIZONTAL_PARAM, smoothedHorizontal);
+            playerManager.animator.SetFloat(stateMachine.VERTICAL_PARAM, smoothedVertical);
+        }
+        
         if (stateMachine.isRunning == false)
         {
             stateMachine.ChangeState(stateMachine.walkState);
@@ -50,7 +72,14 @@ public class PlayerRunState : BaseState
 
     public override void OnFixedUpdateState()
     {
-        HandleNormalRotation();
+        if (stateMachine.isLockedOn)
+        {
+            HandleLockOnRotation();
+        }
+        else
+        {
+            HandleNormalRotation();
+        }           
         HandleNormalMovement();
     }
 
@@ -78,6 +107,24 @@ public class PlayerRunState : BaseState
 
         playerManager.rb.MoveRotation(newRotation);
     }
+    
+    private void HandleLockOnRotation()
+    {
+        Vector3 directionToTarget = stateMachine.lockOnTarget.transform.position - playerManager.transform.position;
+        directionToTarget.y = 0;
+        directionToTarget.Normalize(); 
+        
+        Quaternion targetRotation = Quaternion.LookRotation(directionToTarget);
+
+        Quaternion newRotation = Quaternion.Slerp(
+            playerManager.rb.rotation,
+            targetRotation,
+            playerManager.runRotationSpeed * Time.fixedDeltaTime 
+        );
+
+        playerManager.rb.MoveRotation(newRotation);
+    }
+    
     private void HandleNormalMovement()
     {
         Vector3 finalMoveDirection = stateManager.forward;
@@ -105,11 +152,11 @@ public class PlayerRunState : BaseState
         playerManager.moveLerpSpeed = 3f;
         
         
-        float stopAnimDuration = 0.3f; // 실제 멈춤 애니메이션 길이에 맞춰 조절
+        float stopAnimDuration = 0f; // 실제 멈춤 애니메이션 길이에 맞춰 조절
         yield return new WaitForSeconds(stopAnimDuration);
 
         playerManager.moveLerpSpeed = 40f;
         
-        stateMachine.PlayAnimation(stateMachine.RUN_START_F_0, 0.3f);
+        stateMachine.PlayAnimation(stateMachine.RUN_START_F_0);
     }
 }

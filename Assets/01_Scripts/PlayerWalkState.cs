@@ -1,6 +1,4 @@
-using System;
 using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerWalkState : BaseState
@@ -38,7 +36,7 @@ public class PlayerWalkState : BaseState
             }
             else
             {
-                stateMachine.PlayAnimation(stateMachine.WALK_LOOP_F_0, 0.3f);
+                stateMachine.PlayAnimation(stateMachine.WALK_START_F_0, 0.3f);
             }
         }
     }
@@ -150,11 +148,11 @@ public class PlayerWalkState : BaseState
             new Vector3(playerManager.rb.linearVelocity.x * 0.4f, playerManager.rb.linearVelocity.z, playerManager.rb.linearVelocity.z * 0.4f);
         playerManager.moveLerpSpeed = 3f;
         
-        float stopAnimDuration = 0.3f; // 실제 멈춤 애니메이션 길이에 맞춰 조절
+        float stopAnimDuration = 0f; // 실제 멈춤 애니메이션 길이에 맞춰 조절
         yield return new WaitForSeconds(stopAnimDuration);
 
         playerManager.moveLerpSpeed = 40f;
         
-        stateMachine.PlayAnimation(stateMachine.WALK_START_F_0, 0.3f);
+        stateMachine.PlayAnimation(stateMachine.WALK_START_F_0);
     }
 }

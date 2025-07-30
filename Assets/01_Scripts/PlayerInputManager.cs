@@ -13,6 +13,8 @@ public class PlayerInputManager : MonoBehaviour
     private InputAction JumpAction;
     private InputAction DashAction;
     private InputAction LockOnAction;
+    private InputAction AttackAction;
+    private InputAction ChargeAttackAction;
 
     [Header("Input Properties")] 
     public Vector2 moveInput { get; private set; }
@@ -22,6 +24,9 @@ public class PlayerInputManager : MonoBehaviour
     public static event Action OnJumpPerformed;
     public static event Action OnDashPerformed;
     public static event Action OnLockOnPerformed;
+    public static event Action OnAttackPerformed;
+    public static event Action OnChargeAttackPerformed;
+    public static event Action OnChargeAttackCanceled;
 
     private void Awake()
     {
@@ -33,6 +38,8 @@ public class PlayerInputManager : MonoBehaviour
         JumpAction = playerInput.Normal.Jump;
         DashAction = playerInput.Normal.Dash;
         LockOnAction = playerInput.Normal.LockOn;
+        AttackAction = playerInput.Normal.Attack;
+        ChargeAttackAction = playerInput.Normal.ChargeAttack;
     }
 
     private void OnEnable()
@@ -46,6 +53,9 @@ public class PlayerInputManager : MonoBehaviour
         JumpAction.performed += OnJump_Performed;
         DashAction.performed += OnDash_Performed;
         LockOnAction.performed += OnLockOn_Performed;
+        AttackAction.performed += OnAttack_Performed;
+        ChargeAttackAction.performed += OnChargeAttack_Performed;
+        ChargeAttackAction.canceled += OnChargeAttack_Canceled;
     }
 
 
@@ -59,6 +69,9 @@ public class PlayerInputManager : MonoBehaviour
         JumpAction.performed -= OnJump_Performed;
         DashAction.performed -= OnDash_Performed;
         LockOnAction.performed -= OnLockOn_Performed;
+        AttackAction.performed -= OnAttack_Performed;
+        ChargeAttackAction.performed -= OnChargeAttack_Performed;
+        ChargeAttackAction.canceled -= OnChargeAttack_Canceled;
         
         playerInput.Disable();
     }
@@ -91,5 +104,20 @@ public class PlayerInputManager : MonoBehaviour
     private void OnLockOn_Performed(InputAction.CallbackContext ctx)
     {
         OnLockOnPerformed?.Invoke();
+    }
+
+    private void OnAttack_Performed(InputAction.CallbackContext ctx)
+    {
+        OnAttackPerformed?.Invoke();
+    }
+    
+    private void OnChargeAttack_Performed(InputAction.CallbackContext ctx)
+    {
+        OnChargeAttackPerformed?.Invoke();
+    }
+    
+    private void OnChargeAttack_Canceled(InputAction.CallbackContext ctx)
+    {
+        OnChargeAttackCanceled?.Invoke();
     }
 }

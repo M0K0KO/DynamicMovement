@@ -20,6 +20,8 @@ public class PlayerDashState : BaseState
         inputManager = playerManager.InputManager;
     }
 
+    public Coroutine dashCoroutine;
+    
     private Vector3 moveDirection;
     private bool dashed = false;
     private bool isDashing = false;
@@ -29,9 +31,9 @@ public class PlayerDashState : BaseState
         playerManager.maxAirSpeed = playerManager.dashSpeed;
         stateManager.lockOnSlope = false;
         
-        if (inputManager.moveInput != Vector2.zero)
+        if (inputManager.moveInput != Vector2.zero && !stateMachine.isLockedOn)
             HandleNormalRotation();
-        moveDirection = stateManager.forward;
+        moveDirection = stateManager.forward; //?
 
         if (stateMachine.isLockedOn)
         {
@@ -50,8 +52,8 @@ public class PlayerDashState : BaseState
             else stateMachine.PlayAnimation(stateMachine.DASH_AIR_F_0);
         }
 
-        if (stateMachine.isLockedOn) stateMachine.StartCoroutine(StartDash(playerManager.lockOnDashSpeed, playerManager.lockOnDashDuration));
-        else stateMachine.StartCoroutine(StartDash(playerManager.dashSpeed, playerManager.dashDuration));
+        if (stateMachine.isLockedOn) dashCoroutine = stateMachine.StartCoroutine(StartDash(playerManager.lockOnDashSpeed, playerManager.lockOnDashDuration));
+        else dashCoroutine = stateMachine.StartCoroutine(StartDash(playerManager.dashSpeed, playerManager.dashDuration));
     }
     
     public override void OnUpdateState()
@@ -85,7 +87,7 @@ public class PlayerDashState : BaseState
     
     public override void OnFixedUpdateState()
     {
-        
+        //if (stateMachine.isLockedOn) HandleLockOnRotation();
     }
     
     public override void OnExitState()
@@ -107,6 +109,23 @@ public class PlayerDashState : BaseState
         if (!stateMachine.isLockedOn) playerManager.rb.MoveRotation(targetRotation);
     }
     
+    private void HandleLockOnRotation()
+    {
+        Vector3 directionToTarget = stateMachine.lockOnTarget.transform.position - playerManager.transform.position;
+        directionToTarget.y = 0;
+        directionToTarget.Normalize(); 
+        
+        Quaternion targetRotation = Quaternion.LookRotation(directionToTarget);
+
+        Quaternion newRotation = Quaternion.Slerp(
+            playerManager.rb.rotation,
+            targetRotation,
+            playerManager.runRotationSpeed * Time.fixedDeltaTime 
+        );
+
+        playerManager.rb.MoveRotation(newRotation);
+    }
+    
     IEnumerator StartDash(float dashSpeed, float dashDuration)
     {
         dashed = true;
@@ -123,7 +142,7 @@ public class PlayerDashState : BaseState
 
             Vector3 finalVelocity = new Vector3(velocity.x, playerManager.rb.linearVelocity.y, velocity.z);
             
-            if (!stateManager.isGrounded)
+            if (!stateManager.isGrounded && playerManager.rb.linearVelocity.y < 0f)
             {
                 finalVelocity += Vector3.up * 0.1f;
             }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using Moko;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -15,10 +16,13 @@ public class PlayerStateMachine : MonoBehaviour
     public PlayerFallState fallState { get; private set; }
     public PlayerJumpState jumpState { get; private set; }
     public PlayerDashState dashState { get; private set; }
+    public PlayerAttackState attackState { get; private set; }
+    public PlayerChargeAttackState chargeAttackState { get; private set; }
 
 
     public bool isRunning;
     public bool shouldPlayJumpEnd;
+    public bool shouldPlayChargeAttackEnd;
 
     private float fallTime = 0;
     public float fallThreshold = 0.3f;
@@ -50,13 +54,23 @@ public class PlayerStateMachine : MonoBehaviour
     
     
     public readonly int COMBAT_WALK = Animator.StringToHash("Player_Combat_Walk");
+    public readonly int COMBAT_RUN = Animator.StringToHash("Player_Combat_Run");
     public readonly int HORIZONTAL_PARAM = Animator.StringToHash("Horizontal");
     public readonly int VERTICAL_PARAM = Animator.StringToHash("Vertical");
 
     public readonly int COMBAT_DASH = Animator.StringToHash("Player_Combat_Dash");
     public readonly int DASHHORIZONTAL_PARAM = Animator.StringToHash("DashHorizontal");
     public readonly int DASHVERTICAL_PARAM = Animator.StringToHash("DashVertical");
+    
+    public readonly int PLAYER_COMBO_01_1 = Animator.StringToHash("Player_Combo_01-1");
+    public readonly int PLAYER_COMBO_01_2 = Animator.StringToHash("Player_Combo_01-2");
+    public readonly int PLAYER_COMBO_01_3 = Animator.StringToHash("Player_Combo_01-3");
+    public readonly int PLAYER_COMBO_01_4 = Animator.StringToHash("Player_Combo_01-4");
+    public readonly int NEXT_COMBO_TRIGGER = Animator.StringToHash("NextCombo");
 
+    public readonly int PLAYER_CHARGE_ATTACK_START = Animator.StringToHash("Player_Charge_Attack_Start");
+    public readonly int PLAYER_CHARGE_ATTACK_LOOP = Animator.StringToHash("Player_Charge_Attack_Loop");
+    public readonly int PLAYER_CHARGE_ATTACK_END = Animator.StringToHash("Player_Charge_Attack_End");
     
     public BaseState previousState;
     public BaseState currentState;
@@ -73,8 +87,6 @@ public class PlayerStateMachine : MonoBehaviour
 
     private void Update()
     {
-        DebugState();
-        
         currentState.OnUpdateState();
 
         AdjustMaxSpeed();
@@ -94,6 +106,9 @@ public class PlayerStateMachine : MonoBehaviour
         PlayerInputManager.OnJumpPerformed += HandleJumpInput;
         PlayerInputManager.OnDashPerformed += HandleDashInput;
         PlayerInputManager.OnLockOnPerformed += HandleLockOnInput;
+        PlayerInputManager.OnAttackPerformed += HandleAttackInput;
+        PlayerInputManager.OnChargeAttackPerformed += HandleChargeAttackStart;
+        PlayerInputManager.OnChargeAttackCanceled += HandleChargeAttackStop;
     }
     
     private void OnDisable()
@@ -103,6 +118,9 @@ public class PlayerStateMachine : MonoBehaviour
         PlayerInputManager.OnJumpPerformed -= HandleJumpInput;
         PlayerInputManager.OnDashPerformed -= HandleDashInput;
         PlayerInputManager.OnLockOnPerformed -= HandleLockOnInput;
+        PlayerInputManager.OnAttackPerformed -= HandleAttackInput;
+        PlayerInputManager.OnChargeAttackPerformed -= HandleChargeAttackStart;
+        PlayerInputManager.OnChargeAttackCanceled -= HandleChargeAttackStop;
     }
     
     private void HandleRunStart()
@@ -117,7 +135,7 @@ public class PlayerStateMachine : MonoBehaviour
 
     private void HandleJumpInput()
     {
-        if (playerManager.StateManager.isGrounded && currentState != jumpState
+        if (playerManager.StateManager.isGrounded && currentState != jumpState && currentState != dashState
             && ((playerManager.StateManager.isTouchingSlope 
                  && playerManager.StateManager.currentSurfaceAngle <= playerManager.StateManager.maxClimbableSlopeAngle) 
                 || !playerManager.StateManager.isTouchingSlope))
@@ -138,6 +156,9 @@ public class PlayerStateMachine : MonoBehaviour
         {
             isLockedOn = false;
             lockOnTarget = null;
+            if (currentState == idleState) PlayAnimation(IDLE_ANIMATION);
+            else if (currentState == walkState) PlayAnimation(WALK_LOOP_F_0);
+            else if (currentState == runState) PlayAnimation(RUN_LOOP_F_0);
         }
         else // lock on 을 안하고 있는 경우
         {
@@ -145,11 +166,45 @@ public class PlayerStateMachine : MonoBehaviour
             {
                 isLockedOn = true;
                 lockOnTarget = targetEnemy;
-                StopAllCoroutines();
+                
                 if (currentState == idleState) PlayAnimation(IDLE_COMBAT_ANIMATION);
-                else if (currentState == walkState) PlayAnimation(COMBAT_WALK, 0.1f);
+                else if (currentState == walkState) PlayAnimation(COMBAT_WALK);
+                else if (currentState == runState) PlayAnimation(COMBAT_RUN);
             }
         }
+    }
+
+    private void HandleAttackInput()
+    {
+        if (playerManager.StateManager.isGrounded &&
+            ((playerManager.StateManager.isTouchingSlope 
+              && playerManager.StateManager.currentSurfaceAngle <= playerManager.StateManager.maxClimbableSlopeAngle) 
+             || !playerManager.StateManager.isTouchingSlope)
+            )
+        {
+            if (currentState == attackState)
+                attackState.bufferedInput = true;
+            else
+                ChangeState(attackState);
+        }
+    }
+
+    private void HandleChargeAttackStart()
+    {
+        if (playerManager.StateManager.isGrounded &&
+            ((playerManager.StateManager.isTouchingSlope
+              && playerManager.StateManager.currentSurfaceAngle <= playerManager.StateManager.maxClimbableSlopeAngle)
+             || !playerManager.StateManager.isTouchingSlope) &&
+            currentState != attackState
+           )
+        {
+            ChangeState(chargeAttackState);
+        }
+    }
+
+    private void HandleChargeAttackStop()
+    {
+        if (currentState == chargeAttackState) ChangeState(idleState);
     }
 
     public void PlayAnimation(int animationHash, float durationTime = 0.2f, float timeOffset = 0f)
@@ -173,6 +228,8 @@ public class PlayerStateMachine : MonoBehaviour
         fallState = new PlayerFallState(this);
         jumpState = new PlayerJumpState(this);
         dashState = new PlayerDashState(this);
+        attackState = new PlayerAttackState(this);
+        chargeAttackState = new PlayerChargeAttackState(this);
         
         currentState = idleState;
         currentState.OnEnterState();
@@ -234,32 +291,45 @@ public class PlayerStateMachine : MonoBehaviour
         return false;
     }
 
-    #if UNITY_EDITOR
-    private void DebugState()
+    public void OpenComboWindow()
     {
-        switch (currentState)
+        if (currentState == attackState)
         {
-            case PlayerIdleState:
-                Debug.Log($"Current State : IdleState");
-                break;
-            case PlayerWalkState:
-                Debug.Log($"Current State : WalkState");
-                break;
-            case PlayerRunState:
-                Debug.Log($"Current State : RunState");
-                break;
-            case PlayerFallState:
-                Debug.Log($"Current State : FallState");
-                break;
-            case PlayerJumpState:
-                Debug.Log($"Current State : JumpState");
-                break;
-            case PlayerDashState:
-                Debug.Log($"Current State : DashState");
-                break;
+            attackState.isComboWindowOpen = true;
+        }
+    }
+    
+    public void CloseComboWindow()
+    {
+        if (currentState == attackState)
+        {
+            attackState.isComboWindowOpen = false;
         }
     }
 
+    public void Lunge(float force)
+    {
+        ResetLinearVelocity();
+
+        Vector3 dir = transform.forward.normalized;
+        playerManager.rb.AddForce(dir * force, ForceMode.Impulse);
+    }
+
+    public void AttackJump(float force)
+    {
+        ResetLinearVelocity();
+        
+        // 정면 대각선 위 방향으로 힘을 '한 번'만 가합니다.
+        Vector3 dir = (transform.forward + (Vector3.up * 0.5f)).normalized;
+        playerManager.rb.AddForce(dir * force, ForceMode.Impulse);
+    }
+
+    public void ResetLinearVelocity()
+    {
+        playerManager.rb.linearVelocity = Vector3.zero;
+    }
+
+    #if UNITY_EDITOR
     private void OnDrawGizmos()
     {
         if (Application.isPlaying)
@@ -272,6 +342,10 @@ public class PlayerStateMachine : MonoBehaviour
                 Gizmos.color = Color.cyan;
                 Gizmos.DrawWireSphere(lockOnTarget.transform.position + Vector3.up * 2f, 0.3f);
             }
+
+            Gizmos.color = Color.blue;
+            Gizmos.DrawLine(transform.position + playerManager.playerCollider.center, 
+                transform.position + playerManager.playerCollider.center + transform.forward);
         }
     }
     #endif

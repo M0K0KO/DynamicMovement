@@ -121342,44 +121342,44 @@ AnimationClip:
   m_HasMotionFloatCurves: 0
   m_Events:
   - time: 0
-    functionName: PlayRandomAttackSound
+    functionName: OpenComboWindow
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
-  - time: 0.2
-    functionName: EnableWeapon
+  - time: 0.16666667
+    functionName: Lunge
     data: 
     objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 2
+    floatParameter: 10
+    intParameter: 0
     messageOptions: 0
-  - time: 0.26666668
-    functionName: DisableWeapon
+  - time: 0.16666667
+    functionName: PlayVFX
+    data: Punch1:ComboAttack:1:1
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.23333333
+    functionName: ResetLinearVelocity
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
-    intParameter: 2
+    intParameter: 0
     messageOptions: 0
   - time: 0.3
-    functionName: PlayeCombo2Effect
-    data: 
+    functionName: PlayVFX
+    data: Punch1:ComboAttack:2:1
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
-  - time: 0.33333334
-    functionName: EnableWeapon
+  - time: 1
+    functionName: CloseComboWindow
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
-    intParameter: 2
-    messageOptions: 0
-  - time: 1.1333333
-    functionName: DisableWeapon
-    data: 
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 2
+    intParameter: 0
     messageOptions: 0

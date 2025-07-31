@@ -39309,7 +39309,7 @@ GameObject:
   - component: {fileID: 4233657274757710818}
   - component: {fileID: 959646231745563149}
   - component: {fileID: 7784347637318725919}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: hit distortion
   m_TagString: Untagged
   m_Icon: {fileID: 0}

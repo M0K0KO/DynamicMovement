@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class DamageApplier : MonoBehaviour
 {
+    [SerializeField] private PlayerManager playerManager;
     private List<IDamageable> _hitTargets;
 
     private void Awake()
@@ -27,7 +28,7 @@ public class DamageApplier : MonoBehaviour
 
         if (target != null && !_hitTargets.Contains(target))
         {
-            target.TakeDamage(0);
+            target.TakeDamage(playerManager.gameObject, other.ClosestPoint(transform.position), 0);
             _hitTargets.Add(target);
         }
     }

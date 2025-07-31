@@ -14763,7 +14763,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &9167006024017143906
 Transform:
   m_ObjectHideFlags: 0
@@ -19602,7 +19602,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   poolTag: Punch1
-  lifeTime: 2
+  lifeTime: 1.5
 --- !u!1 &5231195339989085079
 GameObject:
   m_ObjectHideFlags: 0
@@ -19614,7 +19614,7 @@ GameObject:
   - component: {fileID: 6907344103154244874}
   - component: {fileID: 8570817540963603134}
   - component: {fileID: 3607067885120546791}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: hit distortion
   m_TagString: Untagged
   m_Icon: {fileID: 0}

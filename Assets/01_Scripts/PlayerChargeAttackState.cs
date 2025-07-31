@@ -16,7 +16,7 @@ public class PlayerChargeAttackState : BaseState
     }
 
     private float chargeAttackTime = 0f;
-    private float chargeAttackTimeThreshold = 3f;
+    private float chargeAttackTimeThreshold = 0.72f * 5f;
     
     public override void OnEnterState()
     {

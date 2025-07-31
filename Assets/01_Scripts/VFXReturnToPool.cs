@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using System.Collections;
 
@@ -18,7 +19,7 @@ public class VFXReturnToPool : MonoBehaviour
     {
         yield return new WaitForSeconds(lifeTime);
 
-        VFXPoolManager.Instance.ReturnToPool(poolTag, this.gameObject);
+        VFXPoolManager.Instance.ReturnToPool(poolTag, gameObject);
     }
 
     private void OnDisable()

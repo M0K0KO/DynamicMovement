@@ -23061,9 +23061,16 @@ AnimationClip:
   m_HasGenericRootTransform: 0
   m_HasMotionFloatCurves: 0
   m_Events:
+  - time: 0.16666667
+    functionName: EnableHitBox
+    data: RightHand
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
   - time: 0.2
-    functionName: PlayVFX
-    data: Punch1:ChargeAttack:0:1
+    functionName: DisableHitBox
+    data: RightHand
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0

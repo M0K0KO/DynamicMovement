@@ -9,14 +9,11 @@ public class PlayerVFXManager : MonoBehaviour
     
     public List<VFXSequenceData> vfxSequences;
 
-    // (선택사항) 빠른 접근을 위한 딕셔너리
     private Dictionary<string, VFXSequenceData> vfxSequenceDictionary;
 
     private void Awake()
     {
         playerManager = GetComponent<PlayerManager>();
-        // 리스트에 있는 데이터를 딕셔너리로 변환하여 쉽게 찾을 수 있도록 준비합니다.
-        // vfxTag를 Key로 사용합니다.
         vfxSequenceDictionary = vfxSequences.ToDictionary(data => data.sequenceName, data => data);
     }
 
@@ -35,28 +32,28 @@ public class PlayerVFXManager : MonoBehaviour
         if (!int.TryParse(parts[3], out int parentFlag)) { Debug.LogError("추적여부 플래그 오류!"); return; }
 
         // ... (시퀀스 데이터 찾는 로직은 기존과 동일) ...
-        if (!vfxSequenceDictionary.TryGetValue(sequenceName, out VFXSequenceData sequenceData)) { /* ... */ return; }
-        if (index < 0 || index >= sequenceData.sequence.Count) { /* ... */ return; }
+        if (!vfxSequenceDictionary.TryGetValue(sequenceName, out VFXSequenceData sequenceData)) { Debug.Log("Sequence Data Not Found"); return; }
+        if (index < 0 || index >= sequenceData.sequence.Count) { Debug.Log("VFX Index Out Of Range"); return; }
 
         VFXTransformData transformData = sequenceData.sequence[index];
         Vector3 localPos = transformData.localPosition;
         Quaternion localRot = Quaternion.Euler(transformData.localEulerAngles);
         float startTime = transformData.startTime;
 
-        // ✨ [수정] '추적여부(parentFlag)' 값에 따라 다르게 처리합니다.
         if (parentFlag == 1)
         {
-            // 1: 플레이어를 추적 (자식으로 만듦)
-            // 로컬 좌표와 부모(this.transform)를 그대로 전달합니다.
             VFXPoolManager.Instance.GetFromPool(poolTag, localPos, localRot, transform, startTime);
         }
         else
         {
-            // 0: 월드 공간에 고정
-            // 로컬 좌표를 월드 좌표로 변환하고, 부모(parent)는 null로 전달합니다.
             Vector3 worldPos = transform.TransformPoint(localPos);
             Quaternion worldRot = transform.rotation * localRot;
             VFXPoolManager.Instance.GetFromPool(poolTag, worldPos, worldRot, null, startTime);
         }
+    }
+
+    public void DisableAllVFX()
+    {
+        
     }
 }

@@ -4856,7 +4856,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   poolTag: Punch2
-  lifeTime: 2
+  lifeTime: 1.5
 --- !u!1 &3186627705978075086
 GameObject:
   m_ObjectHideFlags: 0
@@ -29422,7 +29422,7 @@ GameObject:
   - component: {fileID: 2677197071031597918}
   - component: {fileID: 1153564063318988737}
   - component: {fileID: 4968674412605735878}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: hit distortion
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -6,6 +6,7 @@ public class PlayerAttackState : BaseState
     private PlayerManager playerManager;
     private PlayerStateManager stateManager;
     private PlayerInputManager inputManager;
+    private PlayerLocomotionManager locomotionManager;
 
     public PlayerAttackState(PlayerStateMachine stateMachine)
     {
@@ -13,8 +14,11 @@ public class PlayerAttackState : BaseState
         playerManager = stateMachine.playerManager;
         stateManager = playerManager.StateManager;
         inputManager = playerManager.InputManager;
+        locomotionManager = playerManager.LocomotionManager;
     }
 
+    private LocomotionParameters locomotionParams;
+    
     public bool bufferedInput = false;
     public bool isComboWindowOpen = false;
     
@@ -23,17 +27,23 @@ public class PlayerAttackState : BaseState
 
     public override void OnEnterState()
     {
+        locomotionParams = new LocomotionParameters
+        {
+            PerformRotation = true,
+            InstantRotation = false,
+            RotationSpeed = playerManager.runRotationSpeed,
+            PerformMovement = false,
+        };
+        
         playerManager.rb.linearVelocity = Vector3.zero;
         isComboWindowOpen = false;
         
         comboCount++;
-        stateMachine.PlayAnimation(stateMachine.PLAYER_COMBO_01_1);
+        locomotionManager.PlayAttackAnimation();
     }
 
     public override void OnUpdateState()
     {
-        if (stateMachine.isLockedOn) HandleLockOnRotation();
-        
         if (isComboWindowOpen && bufferedInput)
         {
             if (comboCount < maxCombo)
@@ -41,7 +51,7 @@ public class PlayerAttackState : BaseState
                 bufferedInput = false;
                 isComboWindowOpen = false;
                 comboCount++;
-                playerManager.animator.SetTrigger(stateMachine.NEXT_COMBO_TRIGGER);
+                playerManager.animator.SetTrigger(locomotionManager.NEXT_COMBO_TRIGGER);
                 
                 return;
             }
@@ -55,14 +65,16 @@ public class PlayerAttackState : BaseState
 
     public override void OnFixedUpdateState()
     {
-        
+        if (stateMachine.isLockedOn) locomotionManager.HandleMovement(locomotionParams);
     }
 
     public override void OnExitState()
     {
+        playerManager.VFXManager.DisableAllVFX();
+        
         comboCount = 0;
         bufferedInput = false;
-        playerManager.animator.ResetTrigger(stateMachine.NEXT_COMBO_TRIGGER);
+        playerManager.animator.ResetTrigger(locomotionManager.NEXT_COMBO_TRIGGER);
         playerManager.CombatManager.DisableAllHitBox();
         playerManager.rb.linearVelocity = Vector3.zero;
     }
@@ -72,22 +84,5 @@ public class PlayerAttackState : BaseState
         AnimatorStateInfo stateInfo = playerManager.animator.GetCurrentAnimatorStateInfo(0);
         if (stateInfo.IsTag("ComboAttack") && stateInfo.normalizedTime > 0.7f) return true;
         else return false;
-    }
-    
-    private void HandleLockOnRotation()
-    {
-        Vector3 directionToTarget = stateMachine.lockOnTarget.transform.position - playerManager.transform.position;
-        directionToTarget.y = 0;
-        directionToTarget.Normalize(); 
-        
-        Quaternion targetRotation = Quaternion.LookRotation(directionToTarget);
-
-        Quaternion newRotation = Quaternion.Slerp(
-            playerManager.rb.rotation,
-            targetRotation,
-            playerManager.walkRotationSpeed * Time.fixedDeltaTime 
-        );
-
-        playerManager.rb.MoveRotation(newRotation);
     }
 }

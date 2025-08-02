@@ -11,6 +11,7 @@ public class PlayerDashState : BaseState
     private PlayerManager playerManager;
     private PlayerStateManager stateManager;
     private PlayerInputManager inputManager;
+    private PlayerLocomotionManager locomotionManager;
 
     public PlayerDashState(PlayerStateMachine stateMachine)
     {
@@ -18,10 +19,9 @@ public class PlayerDashState : BaseState
         playerManager = stateMachine.playerManager;
         stateManager = playerManager.StateManager;
         inputManager = playerManager.InputManager;
+        locomotionManager = playerManager.LocomotionManager;
     }
 
-    public Coroutine dashCoroutine;
-    
     private Vector3 moveDirection;
     private bool dashed = false;
     private bool isDashing = false;
@@ -29,31 +29,18 @@ public class PlayerDashState : BaseState
     public override void OnEnterState()
     {
         playerManager.maxAirSpeed = playerManager.dashSpeed;
-        stateManager.lockOnSlope = false;
+        //stateManager.lockOnSlope = false;
+
+        if (inputManager.moveInput != Vector2.zero && !stateMachine.isLockedOn) locomotionManager.HandleNormalRotation(0f, true);
+        if (stateMachine.isLockedOn) locomotionManager.HandleLockOnRotation(0f, true);
         
-        if (inputManager.moveInput != Vector2.zero && !stateMachine.isLockedOn)
-            HandleNormalRotation();
-        moveDirection = stateManager.forward; //?
-
-        if (stateMachine.isLockedOn)
-        {
-            playerManager.animator.SetFloat(stateMachine.DASHHORIZONTAL_PARAM, Mathf.Sign(inputManager.moveInput.x));
-            if (Mathf.Approximately(inputManager.moveInput.x, 0f))
-                playerManager.animator.SetFloat(stateMachine.DASHHORIZONTAL_PARAM, 0f);
-            playerManager.animator.SetFloat(stateMachine.DASHVERTICAL_PARAM, Mathf.Sign(inputManager.moveInput.y));
-            if (Mathf.Approximately(inputManager.moveInput.y, 0f))
-                playerManager.animator.SetFloat(stateMachine.DASHVERTICAL_PARAM, 0f);
-            
-            stateMachine.PlayAnimation(stateMachine.COMBAT_DASH, 0.1f, 0.1f);
-        }
-        else
-        {
-            if (stateManager.isGrounded) stateMachine.PlayAnimation(stateMachine.DASH_F_0, 0.1f, 0.1f);
-            else stateMachine.PlayAnimation(stateMachine.DASH_AIR_F_0);
-        }
-
-        if (stateMachine.isLockedOn) dashCoroutine = stateMachine.StartCoroutine(StartDash(playerManager.lockOnDashSpeed, playerManager.lockOnDashDuration));
-        else dashCoroutine = stateMachine.StartCoroutine(StartDash(playerManager.dashSpeed, playerManager.dashDuration));
+        
+        moveDirection = stateManager.forward; 
+        
+        locomotionManager.PlayDashAnimation();
+        stateMachine.StartCoroutine(
+            StartDash(stateMachine.isLockedOn ? playerManager.lockOnDashSpeed : playerManager.dashSpeed,
+                stateMachine.isLockedOn ? playerManager.lockOnDashDuration : playerManager.dashDuration));
     }
     
     public override void OnUpdateState()
@@ -87,47 +74,16 @@ public class PlayerDashState : BaseState
     
     public override void OnFixedUpdateState()
     {
-        //if (stateMachine.isLockedOn) HandleLockOnRotation();
     }
     
     public override void OnExitState()
     {
         stateManager.lockOnSlope = true;
     }
-
-    
-    private void HandleNormalRotation()
-    {
-        float targetAngle = Mathf.Atan2(
-            inputManager.moveInput.x,
-            inputManager.moveInput.y
-        ) * Mathf.Rad2Deg + playerManager.playerCam.transform.eulerAngles.y;
-        
-        stateManager.targetAngle = targetAngle;
-
-        Quaternion targetRotation = Quaternion.Euler(0f, targetAngle, 0f);
-        if (!stateMachine.isLockedOn) playerManager.rb.MoveRotation(targetRotation);
-    }
-    
-    private void HandleLockOnRotation()
-    {
-        Vector3 directionToTarget = stateMachine.lockOnTarget.transform.position - playerManager.transform.position;
-        directionToTarget.y = 0;
-        directionToTarget.Normalize(); 
-        
-        Quaternion targetRotation = Quaternion.LookRotation(directionToTarget);
-
-        Quaternion newRotation = Quaternion.Slerp(
-            playerManager.rb.rotation,
-            targetRotation,
-            playerManager.runRotationSpeed * Time.fixedDeltaTime 
-        );
-
-        playerManager.rb.MoveRotation(newRotation);
-    }
     
     IEnumerator StartDash(float dashSpeed, float dashDuration)
     {
+        
         dashed = true;
         isDashing = true;
 
@@ -136,8 +92,8 @@ public class PlayerDashState : BaseState
         {
             elapsedTime += Time.deltaTime;
             if (elapsedTime >= dashDuration) break;
-            
-            if (Vector3.Distance(moveDirection, Vector2.zero) < 0.5f) moveDirection = playerManager.transform.forward;
+
+            if (Vector3.Distance(moveDirection, Vector2.zero) < 0.5f) moveDirection = stateManager.forward;
             Vector3 velocity = moveDirection * dashSpeed;
 
             Vector3 finalVelocity = new Vector3(velocity.x, playerManager.rb.linearVelocity.y, velocity.z);
@@ -153,7 +109,6 @@ public class PlayerDashState : BaseState
         }
         
         stateMachine.storedVelocityBeforeFall = new Vector3(playerManager.rb.linearVelocity.x, 0f, playerManager.rb.linearVelocity.z);
-
         isDashing = false;
     }
 }

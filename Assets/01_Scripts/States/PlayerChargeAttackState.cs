@@ -6,6 +6,7 @@ public class PlayerChargeAttackState : BaseState
     private PlayerManager playerManager;
     private PlayerStateManager stateManager;
     private PlayerInputManager inputManager;
+    private PlayerLocomotionManager locomotionManager;
     
     public PlayerChargeAttackState(PlayerStateMachine stateMachine)
     {
@@ -13,15 +14,30 @@ public class PlayerChargeAttackState : BaseState
         playerManager = stateMachine.playerManager;
         stateManager = playerManager.StateManager;
         inputManager = playerManager.InputManager;
+        locomotionManager = playerManager.LocomotionManager;
     }
 
+    private LocomotionParameters locomotionParams;
+    
     private float chargeAttackTime = 0f;
-    private float chargeAttackTimeThreshold = 0.72f * 5f;
+    private float chargeAttackTimeThreshold = 2f;
+
+    private bool disableVFX = true;
     
     public override void OnEnterState()
     {
+        playerManager.rb.linearVelocity = Vector3.zero;
         
-        stateMachine.PlayAnimation(stateMachine.PLAYER_CHARGE_ATTACK_START);
+        locomotionParams = new LocomotionParameters
+        {
+            PerformMovement = false,
+            
+            PerformRotation = true,
+            RotationSpeed = playerManager.walkRotationSpeed,
+            InstantRotation = false,
+        };
+        
+        locomotionManager.PlayChargeAttackAnimation();
     }
 
     public override void OnUpdateState()
@@ -29,36 +45,21 @@ public class PlayerChargeAttackState : BaseState
         if (chargeAttackTime < chargeAttackTimeThreshold) chargeAttackTime += Time.deltaTime;
         else
         {
-            stateMachine.shouldPlayJumpEnd = true;
-            stateMachine.ChangeState(stateMachine.idleState);
+            disableVFX = false;
+            stateMachine.ChangeState(stateMachine.chargeAttackEndState);
         }
     }
 
     public override void OnFixedUpdateState()
     {
-        if (stateMachine.isLockedOn) HandleLockOnRotation();
+        locomotionManager.HandleMovement(locomotionParams);
     }
 
     public override void OnExitState()
     {
+        if (disableVFX == true)  playerManager.VFXManager.DisableAllVFX();
+        
         playerManager.CombatManager.DisableAllHitBox();
         chargeAttackTime = 0f;
-    }
-    
-    private void HandleLockOnRotation()
-    {
-        Vector3 directionToTarget = stateMachine.lockOnTarget.transform.position - playerManager.transform.position;
-        directionToTarget.y = 0;
-        directionToTarget.Normalize(); 
-        
-        Quaternion targetRotation = Quaternion.LookRotation(directionToTarget);
-
-        Quaternion newRotation = Quaternion.Slerp(
-            playerManager.rb.rotation,
-            targetRotation,
-            playerManager.runRotationSpeed * Time.fixedDeltaTime 
-        );
-
-        playerManager.rb.MoveRotation(newRotation);
     }
 }

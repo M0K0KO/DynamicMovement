@@ -7,9 +7,12 @@ public class PlayerJumpState : BaseState
     private PlayerManager playerManager;
     private PlayerStateManager stateManager;
     private PlayerInputManager inputManager;
+    private PlayerLocomotionManager locomotionManager;
 
     private float jumpBufferTime = 0f;
     private float jumpBufferThreshold = 0.2f;
+    
+    private LocomotionParameters locomotionParams;
     
     public PlayerJumpState(PlayerStateMachine stateMachine)
     {
@@ -17,16 +20,24 @@ public class PlayerJumpState : BaseState
         playerManager = stateMachine.playerManager;
         stateManager = playerManager.StateManager;
         inputManager = playerManager.InputManager;
+        locomotionManager = playerManager.LocomotionManager;
     }
     
     public override void OnEnterState()
     {
+        locomotionParams = new LocomotionParameters
+        {
+            PerformMovement = false,
+            
+            PerformRotation = true,
+            RotationSpeed = playerManager.airRotationSpeed,
+            InstantRotation = false,
+        };
+        
         jumpBufferTime = 0;
         stateManager.lockOnSlope = false;
 
-        if (stateMachine.previousState == stateMachine.walkState) playerManager.maxAirSpeed = playerManager.walkSpeed;
-        
-        stateMachine.PlayAnimation(stateMachine.JUMP_0_START);
+        locomotionManager.PlayJumpAnimation();
         stateMachine.StartCoroutine(StartJump(playerManager.jumpDuration));
     }
     
@@ -62,7 +73,8 @@ public class PlayerJumpState : BaseState
     
     public override void OnFixedUpdateState()
     {
-        HandleNormalAirControl();
+        locomotionManager.ApplyAirControlForce(playerManager.airAcceleration);
+        locomotionManager.HandleMovement(locomotionParams);
     }
     
     public override void OnExitState()
@@ -86,42 +98,6 @@ public class PlayerJumpState : BaseState
             Vector3 finalVelocity = new Vector3(horizontalVelocityX, playerManager.jumpSpeed, horizontalVelocityZ);
             playerManager.rb.linearVelocity = finalVelocity;
             yield return null;
-        }
-    }
-    
-    private void HandleNormalAirControl()
-    {
-        float targetAngle = Mathf.Atan2(
-            inputManager.moveInput.x,
-            inputManager.moveInput.y
-        ) * Mathf.Rad2Deg + playerManager.playerCam.transform.eulerAngles.y;
-    
-        Quaternion targetRotation = Quaternion.Euler(0f, targetAngle, 0f);
-
-        Quaternion newRotation = Quaternion.Slerp(
-            playerManager.rb.rotation, 
-            targetRotation,            
-            playerManager.airRotationSpeed * Time.fixedDeltaTime 
-        );
-
-        playerManager.rb.MoveRotation(newRotation);
-
-        Vector3 camForward = playerManager.playerCam.transform.forward;
-        Vector3 camRight = playerManager.playerCam.transform.right;
-        camForward.y = 0;
-        camRight.y = 0;
-        camForward.Normalize();
-        camRight.Normalize();
-    
-        Vector3 moveDirection = (camForward * inputManager.moveInput.y + camRight * inputManager.moveInput.x).normalized;
-
-        playerManager.rb.AddForce(moveDirection * playerManager.airAcceleration, ForceMode.Acceleration);
-
-        Vector3 horizontalVelocity = new Vector3(playerManager.rb.linearVelocity.x, 0, playerManager.rb.linearVelocity.z);
-        if (horizontalVelocity.magnitude > playerManager.maxAirSpeed)
-        {
-            Vector3 clampedVelocity = horizontalVelocity.normalized * playerManager.maxAirSpeed;
-            playerManager.rb.linearVelocity = new Vector3(clampedVelocity.x, playerManager.rb.linearVelocity.y, clampedVelocity.z);
         }
     }
 }

@@ -29,21 +29,15 @@ public class PlayerStateManager : MonoBehaviour
     public float unclimbableSlopeGravity;
 
 
-    public bool prevGrounded { get; private set; } // prevGrounded 와 isGrounded가 다를 때 착지 or 점프를 감지할 때 사용
     public bool isGrounded { get; private set; }
-    public bool isTouchingWall { get; private set; }
-    public Vector3 wallNormal { get; private set; }
-    public float targetAngle { get; set; }
     public float currentSurfaceAngle { get; private set; }
     public bool isTouchingSlope { get; private set; }
+    public bool isTouchingClimbableSlope { get; private set; }
 
 
     public Vector3 desiredForward;
     public Vector3 forward;
-    public Vector3 globalForward;
     public Vector3 down;
-    public Vector3 globalDown = Vector3.down;
-
     public Vector3 baseGroundNormal;
     public Vector3 forwardGroundNormal;
 
@@ -61,7 +55,6 @@ public class PlayerStateManager : MonoBehaviour
         CalculateRelativeDirection();
         
         CheckGrounded();
-        CheckWall();
 
         UpdateGroundNormals();
         CheckSlope();
@@ -69,48 +62,30 @@ public class PlayerStateManager : MonoBehaviour
         ApplyGravity();
     }
 
-    private void CalculateRelativeDirection()
+    private void CalculateRelativeDirection() // calculate desired Direction 
     {
-        Vector2 input = playerManager.InputManager.moveInput;
-        Vector3 camForward = playerManager.playerCam.transform.forward;
-        Vector3 camRight = playerManager.playerCam.transform.right;
-        camForward.y = 0;
-        camForward.Normalize();
-        camRight.y = 0;
-        camRight.Normalize();
-        desiredForward = (camForward * input.y) + (camRight * input.x);
+        
+        if (playerManager.InputManager.moveInput != Vector2.zero)
+        {
+            Vector2 input = playerManager.InputManager.moveInput;
+            Vector3 camForward = playerManager.playerCam.transform.forward;
+            Vector3 camRight = playerManager.playerCam.transform.right;
+            camForward.y = 0;
+            camForward.Normalize();
+            camRight.y = 0;
+            camRight.Normalize();
+            desiredForward = (camForward * input.y) + (camRight * input.x);
+        }
+        else
+        {
+            desiredForward = transform.forward;
+        }
     }
-
 
     private void CheckGrounded() // Physics CheckSphere
     {
-        prevGrounded = isGrounded;
         isGrounded = Physics.CheckSphere(transform.position - new Vector3(0, originalColliderHeight / 2f, 0) - groundCheckOffset,
             groundCheckerThreshold, groundMask);
-    }
-
-    private void CheckWall() // 8 direction Raycast based on globalForward
-    {
-        bool tempWall = false;
-        Vector3 tempWallNormal = Vector3.zero;
-        Vector3 topWallPos = new Vector3(transform.position.x, transform.position.y + wallCheckStartDistance,
-            transform.position.z);
-
-        for (int i = 0; i < 8; i++)
-        {
-            var angle = i * 45f;
-            var direction = Quaternion.AngleAxis(angle, transform.up) * globalForward;
-
-            if (Physics.Raycast(topWallPos, direction, out RaycastHit wallHit, wallCheckerThreshold, groundMask))
-            {
-                tempWallNormal = wallHit.normal;
-                tempWall = true;
-                break;
-            }
-        }
-
-        isTouchingWall = tempWall;
-        wallNormal = tempWallNormal;
     }
 
     // 캐릭터의 transform.forward방향 기준 정면에서 밑으로 Raycast
@@ -119,7 +94,7 @@ public class PlayerStateManager : MonoBehaviour
     // Slope를 감지했다면, projectOnPlane을 통해 진행방향을 Slope에 Lock
     // Slope를 빠져나오는 것은 마찬가지로 ForwardGroundNormal이 0이고, Vector.down groundNormal과 다를 때를 기준으로 함.
     // Slope를 빠져나온다면, projectOnPlane을 통해 진향방향을 Plane에 Lock
-    // Slope를 감지하면, 해당 Slope가 Climbable인지 확인함. Climbable이라면, Slope에 Lock. 아니라면, SetFriction으로 미끄러지게 함.
+    // Slope를 감지하면, 해당 Slope가 Climbable인지 확인함. Climbable이라면, Slope에 Lock. 
 
     private void UpdateGroundNormals()
     {
@@ -139,20 +114,22 @@ public class PlayerStateManager : MonoBehaviour
         {
             forwardGroundNormal = hit.normal.normalized;
         }
-    }
+    } // Updates BaseNormal, GroundNormal via Raycast
 
     private void CheckSlope()
     {
         // base, forward 둘 다 평지라면 현재 평지, 둘 중 하나라도 slope면 현재 slope로....
-
         isTouchingSlope = !(
             (baseGroundNormal - Vector3.up).sqrMagnitude < 0.05f // base가 평지?
             && (forwardGroundNormal - Vector3.up).sqrMagnitude < 0.05f // forward가 평지?
             );
+
+        isTouchingClimbableSlope =
+            isTouchingSlope && Vector3.Angle(forwardGroundNormal, Vector3.up) < maxClimbableSlopeAngle;
         
         Vector3 horizontalDirection = new Vector3(desiredForward.x, 0, desiredForward.z).normalized;
-        forward = horizontalDirection;
-        down = -transform.up.normalized;
+        forward = horizontalDirection; 
+        down = -transform.up.normalized; 
         
         if (isGrounded) // Slope 감지는 땅에 있을 때만
         {
@@ -183,6 +160,7 @@ public class PlayerStateManager : MonoBehaviour
         else // 공중이라면?
         {
             isTouchingSlope = false;
+            isTouchingClimbableSlope = false;
         }
         
     }
@@ -193,13 +171,13 @@ public class PlayerStateManager : MonoBehaviour
 
         if (isTouchingSlope) // 경사로
         {
-            if (Vector3.Angle(forwardGroundNormal, Vector3.up) > maxClimbableSlopeAngle) // 오를 수 없는 경사의 Slope
-            {
-                gravity = down * (-Physics.gravity.y * unclimbableSlopeGravity);
-            }
-            else // 오를 수 있는 경사의 Slope
+            if (isTouchingClimbableSlope) // 오를 수 있는 경사의 Slope
             {
                 gravity = down * (-Physics.gravity.y * climbableSlopeGravity);
+            }
+            else // 오를 수 없는 경사의 Slope
+            {
+                gravity = down * (-Physics.gravity.y * unclimbableSlopeGravity);
             }
         }
         else // 평지

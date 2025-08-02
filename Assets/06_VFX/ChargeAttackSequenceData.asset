@@ -14,24 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sequenceName: ChargeAttack
   sequence:
-  - localPosition: {x: 0.425, y: -1.265168, z: -0.1300022}
-    localEulerAngles: {x: 4.105, y: -25.33, z: -1.941}
-    startTime: 0
-  - localPosition: {x: -1.091, y: 0.82, z: -0.343}
-    localEulerAngles: {x: 47.308, y: -27.627, z: -91.045}
-    startTime: 0
-  - localPosition: {x: 0.218, y: -1.277, z: -0.458}
-    localEulerAngles: {x: 1.164, y: -2.206, z: 22.618}
-    startTime: 0
-  - localPosition: {x: 0.468, y: -1.176, z: -0.04}
-    localEulerAngles: {x: 1.164, y: -4.185, z: 22.618}
-    startTime: 0
-  - localPosition: {x: 0.868, y: -1.162, z: 0.332}
-    localEulerAngles: {x: 13.215, y: -49.925, z: 15.116}
-    startTime: 0
-  - localPosition: {x: -1.66, y: -0.042, z: 0.246}
-    localEulerAngles: {x: 36.819, y: 37.212, z: -43.818}
-    startTime: 0
-  - localPosition: {x: 0.611, y: -1.251, z: 0.008}
-    localEulerAngles: {x: 4.765, y: -36.237, z: -3.484}
+  - localPosition: {x: 0, y: -1.09, z: -0.229}
+    localEulerAngles: {x: 0, y: 0, z: 0}
     startTime: 0

@@ -69862,13 +69862,6 @@ AnimationClip:
   m_HasMotionFloatCurves: 0
   m_Events:
   - time: 0.1
-    functionName: PlayVFX
-    data: Punch3:ChargeAttack:1:1
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 0
-    messageOptions: 0
-  - time: 0.1
     functionName: EnableHitBox
     data: LeftHand
     objectReferenceParameter: {fileID: 0}
@@ -69878,13 +69871,6 @@ AnimationClip:
   - time: 0.16666667
     functionName: DisableHitBox
     data: LeftHand
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 0
-    messageOptions: 0
-  - time: 0.26666668
-    functionName: PlayVFX
-    data: Punch3:ChargeAttack:2:1
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0
@@ -69910,23 +69896,9 @@ AnimationClip:
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
-  - time: 0.43333334
-    functionName: PlayVFX
-    data: Punch1:ChargeAttack:3:1
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 0
-    messageOptions: 0
   - time: 0.46666667
     functionName: DisableHitBox
     data: LeftHand
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 0
-    messageOptions: 0
-  - time: 0.56666666
-    functionName: PlayVFX
-    data: Punch1:ChargeAttack:4:1
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0
@@ -69952,13 +69924,6 @@ AnimationClip:
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
-  - time: 0.73333335
-    functionName: PlayVFX
-    data: Punch3:ChargeAttack:5:1
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 0
-    messageOptions: 0
   - time: 0.76666665
     functionName: DisableHitBox
     data: LeftHand
@@ -69969,13 +69934,6 @@ AnimationClip:
   - time: 0.8333333
     functionName: EnableHitBox
     data: RightHand
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 0
-    messageOptions: 0
-  - time: 0.8666667
-    functionName: PlayVFX
-    data: Punch1:ChargeAttack:6:1
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0

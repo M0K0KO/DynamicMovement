@@ -15,8 +15,8 @@ public class PlayerDebugPanel : MonoBehaviour
         float verticalVelocity = playerManager.rb.linearVelocity.y;
         
         display.SetText($" Grounded : {playerManager.StateManager.isGrounded}\n" +
-                        $" TouchingWall : {playerManager.StateManager.isTouchingWall}\n" +
                         $" TouchingSlope : {playerManager.StateManager.isTouchingSlope}\n" +
+                        $" ClimbableSlope : {playerManager.StateManager.isTouchingClimbableSlope}\n" +
                         $" horizontalVelocity : " + horizontalVelocity.magnitude.ToString("F2") + "\n" +
                         $" verticalVelocity : " + verticalVelocity.ToString("F2") + "\n" +
                         $" maxAirVelocity : " + playerManager.maxAirSpeed.ToString("F2") + "\n" +
@@ -34,6 +34,8 @@ public class PlayerDebugPanel : MonoBehaviour
                 return "Walk";
             case PlayerRunState:
                 return "Run";
+            case PlayerLandState:
+                return "Land";
             case PlayerFallState:
                 return "Fall";
             case PlayerJumpState:
@@ -44,6 +46,8 @@ public class PlayerDebugPanel : MonoBehaviour
                 return "Attack";
             case PlayerChargeAttackState:
                 return "ChargeAttack";
+            case PlayerChargeAttackEndState:
+                return "ChargeAttackEnd";
         }
 
         return "NULL";

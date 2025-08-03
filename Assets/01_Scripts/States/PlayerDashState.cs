@@ -22,6 +22,8 @@ public class PlayerDashState : BaseState
         locomotionManager = playerManager.LocomotionManager;
     }
 
+    private Coroutine dashCoroutine;
+    
     private Vector3 moveDirection;
     private bool dashed = false;
     private bool isDashing = false;
@@ -38,7 +40,7 @@ public class PlayerDashState : BaseState
         moveDirection = stateManager.forward; 
         
         locomotionManager.PlayDashAnimation();
-        stateMachine.StartCoroutine(
+        dashCoroutine = stateMachine.StartCoroutine(
             StartDash(stateMachine.isLockedOn ? playerManager.lockOnDashSpeed : playerManager.dashSpeed,
                 stateMachine.isLockedOn ? playerManager.lockOnDashDuration : playerManager.dashDuration));
     }
@@ -78,6 +80,7 @@ public class PlayerDashState : BaseState
     
     public override void OnExitState()
     {
+        if (dashCoroutine != null) stateMachine.StopCoroutine(dashCoroutine);
         stateManager.lockOnSlope = true;
     }
     

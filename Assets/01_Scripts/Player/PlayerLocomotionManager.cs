@@ -57,7 +57,7 @@ public class PlayerLocomotionManager : MonoBehaviour
             targetSpeed = playerManager.StateMachine.isRunning ? 1f : 0.5f;
         }
         
-        animator.SetFloat(ISLOCKEDON_PARAM, playerManager.StateMachine.isLockedOn ? 1f : 0f);
+        LerpUpdateParam(ISLOCKEDON_PARAM, playerManager.StateMachine.isLockedOn ? 1f : 0f);
         LerpUpdateParam(HORIZONTAL_PARAM, targetHorizontal);
         LerpUpdateParam(VERTICAL_PARAM, targetVertical);
         LerpUpdateParam(SPEED_PARAM, targetSpeed);

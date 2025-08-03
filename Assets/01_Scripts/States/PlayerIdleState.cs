@@ -22,13 +22,15 @@ public class PlayerIdleState : BaseState
 
     public override void OnEnterState()
     {
-        locomotionManager.PlayGroundedAnimation();
         playerManager.rb.linearVelocity = Vector3.zero;
+        
+        playerManager.animator.applyRootMotion = true;
+        locomotionManager.PlayGroundedAnimation();
     }
     
     public override void OnUpdateState()
     {
-        playerManager.rb.linearVelocity = Vector3.zero;
+        //playerManager.rb.linearVelocity = Vector3.zero;
         
         if (stateMachine.playerManager.InputManager.moveInput != Vector2.zero)
         {
@@ -52,6 +54,8 @@ public class PlayerIdleState : BaseState
     
     public override void OnExitState()
     {
+        playerManager.animator.applyRootMotion = false;
+        
         if (stopCoroutine != null)
         {
             stateMachine.StopCoroutine(stopCoroutine);

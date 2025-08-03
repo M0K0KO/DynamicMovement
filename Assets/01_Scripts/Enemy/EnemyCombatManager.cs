@@ -30,5 +30,6 @@ public class EnemyCombatManager : MonoBehaviour, IDamageable
         
         
         enemyManager.vfxManager.PlayVFX(vfxData, "PunchHit", false);
+        enemyManager.locomotionManager.PlayHitAnimation(hitEventArgs);
     }
 }

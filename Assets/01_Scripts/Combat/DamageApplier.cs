@@ -32,7 +32,7 @@ public class DamageApplier : MonoBehaviour
 
         if (target != null && !_hitTargets.Contains(target))
         {
-            HitstopManager.Instance.StartHitstop(0.035f);
+            HitstopManager.Instance.StartHitstop(0.05f);
 
             Vector3 attackDirection = other.transform.position - other.ClosestPoint(transform.position);
             Vector3 impulseVelocity = attackDirection.normalized;

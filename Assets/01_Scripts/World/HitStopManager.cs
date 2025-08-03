@@ -1,4 +1,6 @@
+using System;
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class HitstopManager : MonoBehaviour
@@ -7,6 +9,7 @@ public class HitstopManager : MonoBehaviour
 
     private Coroutine hitstopCoroutine;
     private float originalTimeScale = 1f;
+    private bool isHitstopping = false;
 
     private void Awake()
     {
@@ -18,6 +21,11 @@ public class HitstopManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+    }
+
+    private void Update()
+    {
+        Debug.Log(hitstopCoroutine == null);
     }
 
     public void StartHitstop(float duration)
@@ -33,18 +41,18 @@ public class HitstopManager : MonoBehaviour
 
     private IEnumerator HitstopCoroutine(float duration)
     {
-        // 기존 Time.timeScale 저장
-        originalTimeScale = Time.timeScale;
+        if (!isHitstopping)
+        {
+            originalTimeScale = Time.timeScale;
+            isHitstopping = true;
+        }
         
-        // 시간 멈춤
         Time.timeScale = 0f;
 
-        // 지정된 시간(실제 시간 기준)만큼 대기
         yield return new WaitForSecondsRealtime(duration);
 
-        // 시간 원래대로 복원
         Time.timeScale = originalTimeScale;
-
+        isHitstopping = false;
         hitstopCoroutine = null;
     }
 }

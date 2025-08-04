@@ -35,6 +35,8 @@ public class PlayerLocomotionManager : MonoBehaviour
     public readonly int PLAYER_CHARGE_ATTACK_LOOP = Animator.StringToHash("Player_Charge_Attack_Loop");
     public readonly int PLAYER_CHARGE_ATTACK_END = Animator.StringToHash("Player_Charge_Attack_End");
 
+    public readonly int PLAYER_DASH_ATTACK = Animator.StringToHash("Player_DashAttack");
+
     
     private void Awake()
     {
@@ -62,7 +64,31 @@ public class PlayerLocomotionManager : MonoBehaviour
         LerpUpdateParam(VERTICAL_PARAM, targetVertical);
         LerpUpdateParam(SPEED_PARAM, targetSpeed);
     }
-    
+
+    private void OnAnimatorMove()
+    {
+        if (playerManager.StateMachine.currentState == playerManager.StateMachine.attackState 
+            || playerManager.StateMachine.currentState == playerManager.StateMachine.chargeAttackState
+            || playerManager.StateMachine.currentState == playerManager.StateMachine.dashAttackState)
+        {
+            Vector3 deltaPosition = animator.deltaPosition;
+
+            if (playerManager.StateMachine.isLockedOn &&
+                Vector3.Distance(playerManager.StateMachine.lockOnTarget.transform.position,
+                    transform.position) < 1.5f)
+            {
+                Vector3 localDelta = transform.InverseTransformDirection(deltaPosition);
+                localDelta.z = 0;
+                deltaPosition = transform.TransformDirection(localDelta);
+            }
+            
+            Vector3 targetPosition = playerManager.rb.position + deltaPosition;
+            
+            playerManager.rb.MovePosition(targetPosition);
+            playerManager.rb.MoveRotation(animator.rootRotation);
+        }
+    }
+
     public void HandleMovement(LocomotionParameters parameters)
     {
         if (parameters.PerformRotation)
@@ -206,6 +232,11 @@ public class PlayerLocomotionManager : MonoBehaviour
     public void PlayChargeAttackEndAnimation()
     {
         animator.CrossFadeInFixedTime(PLAYER_CHARGE_ATTACK_END, 0.1f);
+    }
+
+    public void PlayDashAttackAnimation()
+    {
+        animator.CrossFadeInFixedTime(PLAYER_DASH_ATTACK, 0.1f);
     }
     
     private void LerpUpdateParam(int paramHash, float targetValue)

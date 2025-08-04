@@ -38,6 +38,8 @@ public class PlayerManager : MonoBehaviour
     public float lockOnDashDuration = 0.5f;
     public float lockOnDashSpeed = 13f;
 
+    public float dashAttackSpeed = 40f;
+
     public float enemyDetectionRange = 15f;
     
 

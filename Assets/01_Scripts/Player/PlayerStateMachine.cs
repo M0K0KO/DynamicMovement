@@ -19,6 +19,7 @@ public class PlayerStateMachine : MonoBehaviour
     public PlayerAttackState attackState { get; private set; }
     public PlayerChargeAttackState chargeAttackState { get; private set; }
     public PlayerChargeAttackEndState chargeAttackEndState { get; private set; }
+    public PlayerDashAttackState dashAttackState { get; private set; }
 
 
     public bool isRunning;
@@ -67,6 +68,7 @@ public class PlayerStateMachine : MonoBehaviour
         PlayerInputManager.OnAttackPerformed += HandleAttackInput;
         PlayerInputManager.OnChargeAttackPerformed += HandleChargeAttackStart;
         PlayerInputManager.OnChargeAttackCanceled += HandleChargeAttackStop;
+        PlayerInputManager.OnDashAttackPerformed += HandleDashAttackInput;
     }
     private void OnDisable()
     {
@@ -78,6 +80,7 @@ public class PlayerStateMachine : MonoBehaviour
         PlayerInputManager.OnAttackPerformed -= HandleAttackInput;
         PlayerInputManager.OnChargeAttackPerformed -= HandleChargeAttackStart;
         PlayerInputManager.OnChargeAttackCanceled -= HandleChargeAttackStop;
+        PlayerInputManager.OnDashAttackPerformed -= HandleDashAttackInput;
     }
     
     
@@ -94,7 +97,10 @@ public class PlayerStateMachine : MonoBehaviour
     
     private void HandleJumpInput()
     {
-        if (playerManager.StateManager.isGrounded && currentState != jumpState && currentState != dashState
+        if (playerManager.StateManager.isGrounded
+            && currentState != jumpState 
+            && currentState != dashState
+            && currentState != landState
             && (playerManager.StateManager.isTouchingClimbableSlope || !playerManager.StateManager.isTouchingSlope))
         {
             ChangeState(jumpState);
@@ -125,7 +131,7 @@ public class PlayerStateMachine : MonoBehaviour
     
     private void HandleAttackInput()
     {
-        if (playerManager.StateManager.isGrounded &&
+        if (playerManager.StateManager.isGrounded && currentState != dashState &&
             (playerManager.StateManager.isTouchingClimbableSlope || !playerManager.StateManager.isTouchingSlope))
         {
             if (currentState == attackState)
@@ -137,7 +143,7 @@ public class PlayerStateMachine : MonoBehaviour
     
     private void HandleChargeAttackStart()
     {
-        if (playerManager.StateManager.isGrounded &&
+        if (playerManager.StateManager.isGrounded && currentState != dashState &&
             (playerManager.StateManager.isTouchingClimbableSlope || !playerManager.StateManager.isTouchingSlope)
            )
         {
@@ -148,6 +154,19 @@ public class PlayerStateMachine : MonoBehaviour
     private void HandleChargeAttackStop()
     {
         if (currentState == chargeAttackState) ChangeState(chargeAttackEndState);
+    }
+
+    private void HandleDashAttackInput()
+    {
+        if (playerManager.StateManager.isGrounded
+            && isLockedOn
+            && currentState != dashState
+            && currentState != attackState
+            && currentState != chargeAttackState
+            && currentState != dashAttackState)
+        {
+            ChangeState(dashAttackState);
+        }
     }
     
     
@@ -169,6 +188,7 @@ public class PlayerStateMachine : MonoBehaviour
         attackState = new PlayerAttackState(this);
         chargeAttackState = new PlayerChargeAttackState(this);
         chargeAttackEndState = new PlayerChargeAttackEndState(this);
+        dashAttackState = new PlayerDashAttackState(this);
         
         currentState = idleState;
         currentState.OnEnterState();

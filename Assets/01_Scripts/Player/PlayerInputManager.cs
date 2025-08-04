@@ -15,6 +15,7 @@ public class PlayerInputManager : MonoBehaviour
     private InputAction LockOnAction;
     private InputAction AttackAction;
     private InputAction ChargeAttackAction;
+    private InputAction DashAttackAction;
 
     [Header("Input Properties")] 
     public Vector2 moveInput { get; private set; }
@@ -27,6 +28,7 @@ public class PlayerInputManager : MonoBehaviour
     public static event Action OnAttackPerformed;
     public static event Action OnChargeAttackPerformed;
     public static event Action OnChargeAttackCanceled;
+    public static event Action OnDashAttackPerformed;
 
     private void Awake()
     {
@@ -40,6 +42,7 @@ public class PlayerInputManager : MonoBehaviour
         LockOnAction = playerInput.Normal.LockOn;
         AttackAction = playerInput.Normal.Attack;
         ChargeAttackAction = playerInput.Normal.ChargeAttack;
+        DashAttackAction = playerInput.Normal.DashAttack;
     }
 
     private void OnEnable()
@@ -56,7 +59,8 @@ public class PlayerInputManager : MonoBehaviour
         AttackAction.performed += OnAttack_Performed;
         ChargeAttackAction.performed += OnChargeAttack_Performed;
         ChargeAttackAction.canceled += OnChargeAttack_Canceled;
-    }
+        DashAttackAction.performed += OnDashAttack_Performed;
+    }   
 
 
 
@@ -72,6 +76,7 @@ public class PlayerInputManager : MonoBehaviour
         AttackAction.performed -= OnAttack_Performed;
         ChargeAttackAction.performed -= OnChargeAttack_Performed;
         ChargeAttackAction.canceled -= OnChargeAttack_Canceled;
+        DashAttackAction.performed -= OnDashAttack_Performed;
         
         playerInput.Disable();
     }
@@ -119,5 +124,10 @@ public class PlayerInputManager : MonoBehaviour
     private void OnChargeAttack_Canceled(InputAction.CallbackContext ctx)
     {
         OnChargeAttackCanceled?.Invoke();
+    }
+
+    private void OnDashAttack_Performed(InputAction.CallbackContext ctx)
+    {
+        OnDashAttackPerformed?.Invoke();
     }
 }

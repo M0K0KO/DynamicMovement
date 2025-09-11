@@ -127,6 +127,8 @@ public class PlayerStateMachine : MonoBehaviour
                 lockOnTarget = targetEnemy;
             }
         }
+        
+        playerManager.playerCameraManager.HandleDefaultCameraState();
     }
     
     private void HandleAttackInput()

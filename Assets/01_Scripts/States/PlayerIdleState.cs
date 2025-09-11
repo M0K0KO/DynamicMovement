@@ -20,8 +20,17 @@ public class PlayerIdleState : BaseState
         locomotionManager = playerManager.LocomotionManager;
     }
 
+    private LocomotionParameters locomotionParams;
+    
     public override void OnEnterState()
     {
+        locomotionParams = new LocomotionParameters
+        {
+            PerformMovement = false,
+            PerformRotation = true,
+            RotationSpeed = playerManager.walkRotationSpeed,
+        };
+        
         locomotionManager.PlayGroundedAnimation();
         playerManager.rb.linearVelocity = Vector3.zero;
     }
@@ -47,7 +56,7 @@ public class PlayerIdleState : BaseState
     
     public override void OnFixedUpdateState()
     {
-        
+        locomotionManager.HandleMovement(locomotionParams);
     }
     
     public override void OnExitState()

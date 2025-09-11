@@ -48,6 +48,8 @@ public class PlayerDebugPanel : MonoBehaviour
                 return "ChargeAttack";
             case PlayerChargeAttackEndState:
                 return "ChargeAttackEnd";
+            case PlayerDashAttackState:
+                return "DashAttack";
         }
 
         return "NULL";

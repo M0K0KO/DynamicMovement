@@ -24,6 +24,7 @@ public class PlayerDashAttackState : BaseState
     {
         locomotionManager.PlayDashAttackAnimation();
         locomotionManager.HandleLockOnRotation(0f, true);
+        playerManager.DashTrail.meshRefreshRate = 0.015f;
         stateMachine.StartCoroutine(DashAttack());
     }
     
@@ -41,12 +42,16 @@ public class PlayerDashAttackState : BaseState
     
     public override void OnExitState()
     {
+        playerManager.VFXManager.DisableAllVFX();
+        playerManager.CombatManager.DisableAllHitBox();
         stateMachine.StopCoroutine(DashAttack());
         dashAttackEnd = false;
     }
 
     IEnumerator DashAttack()
     {
+        playerManager.playerCameraManager.ChangeLockOnCameraState("LockOnDashCam", playerManager.playerCameraManager.lockOnDashCam);
+        playerManager.DashTrail.Activate(true);
         while (true)
         {
             float targetDistance = Vector3.Distance(playerManager.transform.position,
@@ -63,5 +68,9 @@ public class PlayerDashAttackState : BaseState
 
             yield return null;
         }
+        
+        playerManager.DashTrail.Activate(false);
+        playerManager.DashTrail.meshRefreshRate = 0.035f;
+        playerManager.playerCameraManager.HandleDefaultCameraState();
     }
 }

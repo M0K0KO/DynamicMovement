@@ -83,9 +83,11 @@ public class PlayerDashState : BaseState
     
     IEnumerator StartDash(float dashSpeed, float dashDuration)
     {
-        
         dashed = true;
         isDashing = true;
+        playerManager.DashTrail.Activate(true);
+        
+        if (stateMachine.isLockedOn) playerManager.playerCameraManager.ChangeLockOnCameraState("LockOnDashCam", playerManager.playerCameraManager.lockOnDashCam);
 
         float elapsedTime = 0f;
         while (true)
@@ -108,7 +110,10 @@ public class PlayerDashState : BaseState
             yield return null;
         }
         
+        playerManager.playerCameraManager.HandleDefaultCameraState();
+        
         stateMachine.storedVelocityBeforeFall = new Vector3(playerManager.rb.linearVelocity.x, 0f, playerManager.rb.linearVelocity.z);
         isDashing = false;
+        playerManager.DashTrail.Activate(false);
     }
 }

@@ -16,6 +16,9 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] public PlayerLocomotionManager LocomotionManager;
     [SerializeField] public PlayerVFXManager VFXManager;
     [SerializeField] public PlayerCombatManager CombatManager;
+    [SerializeField] public DashTrail DashTrail;
+
+    public PlayerCameraManager playerCameraManager;
 
     public float moveLerpSpeed = 40f;
     
@@ -48,7 +51,9 @@ public class PlayerManager : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         playerCollider = GetComponent<CapsuleCollider>();
         playerCam = Camera.main;
+        playerCameraManager = playerCam.GetComponent<PlayerCameraManager>();
         animator = GetComponent<Animator>();
         VFXManager = GetComponent<PlayerVFXManager>();
+        DashTrail = GetComponent<DashTrail>();
     }
 }
